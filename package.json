@@ -13,10 +13,12 @@
   ],
   "scripts": {
     "build": "tsc",
+    "dev": "tsc; probot run ./lib/index.js",
     "start": "probot run ./lib/index.js",
     "test": "jest"
   },
   "dependencies": {
+    "cross-fetch": "^3.1.5",
     "probot": "^11.0.1"
   },
   "devDependencies": {
