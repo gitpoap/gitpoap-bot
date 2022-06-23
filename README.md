@@ -6,10 +6,13 @@
 
 ```sh
 # Install dependencies
-npm install
+yarn
+
+# Build the typescript code
+yarn build
 
 # Run the bot
-npm start
+yarn start
 ```
 
 ## Docker
