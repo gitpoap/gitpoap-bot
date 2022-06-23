@@ -53,9 +53,9 @@ export = (app: Probot) => {
       installation_id: context.payload.installation.id,
     });
 
-    const repo = context.payload.repository.full_name;
+    const repo = context.payload.repository.name;
     const owner = context.payload.repository.owner.login;
-    const pullRequestNum = context.payload.pull_request.number;
+    const pullRequestNumber = context.payload.number;
 
     const res = await fetch(`${process.env.API_URL}/claims/gitpoap-bot/create`, {
       method: 'POST',
@@ -67,7 +67,7 @@ export = (app: Probot) => {
       body: JSON.stringify({
         repo,
         owner,
-        pullRequestNum,
+        pullRequestNumber,
       }),
     });
 
@@ -89,7 +89,7 @@ export = (app: Probot) => {
       body: generateComment(response.newClaims),
     });
 
-    await context.octokit.issue.createComment(issueComment);
+    await context.octokit.issues.createComment(issueComment);
 
     context.log.info('Posted comment about new claims');
   });
@@ -97,7 +97,7 @@ export = (app: Probot) => {
   app.on('pull_request.closed', async (context) => {
     const pullRequestNum = context.payload.pull_request.number;
     const issueComment = context.issue({
-      body: `Thanks for REOPENING PR #${pullRequestNum}!`,
+      body: `Thanks for CLOSING PR #${pullRequestNum}!`,
     });
 
     context.log.info(context.payload.repository.owner);
