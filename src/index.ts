@@ -10,21 +10,48 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
+// Should be the same as in gitpoap-backend/src/routes/claims.ts
+type BotClaimData = {
+  id: number;
+  gitPOAP: { id: number; poapEventId: number; threshold: number };
+  name: string;
+  imageUrl: string;
+  description: string;
+};
+
+function generateComment(claims: BotClaimData[]): string {
+  // TODO: @colfax figure out exact copy to put in this...
+
+  let qualifier: string;
+  if (claims.length > 1) {
+    qualifier = `some GitPOAPs`;
+  } else {
+    qualifier = `a GitPOAP`;
+  }
+
+  let comment = `Woohoo, your important contribution to this open source project has earned you ${qualifier}!\nEarned:`;
+
+  for (const claim of claims) {
+    comment += `
+* [**${claim.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id})
+    ![${claim.name} Token](${claim.imageUrl})
+    - ${claim.description}`
+  }
+
+  comment += '\n\nHead over to the [GitPOAP Site](https://www.gitpoap.io) to mint your new GitPOAPs!';
+
+  return comment;
+}
+
 export = (app: Probot) => {
   /* Eventually turn into pull_request.merged */
   app.on('pull_request.reopened', async (context: Context) => {
-    // const auth = await context.octokit.auth();
-
-    // console.log(app)
     console.log('IN THE REPOPENED HANDLER');
-    // const auth = await context.octokit.auth();
+
     const github = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const tokenData = await github.apps.createInstallationAccessToken({
       installation_id: context.payload.installation.id,
     });
-
-    const token = tokenData.data.token;
-    console.log(token);
 
     const repo = context.payload.repository.full_name;
     const owner = context.payload.repository.owner.login;
@@ -35,7 +62,7 @@ export = (app: Probot) => {
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenData.data.token}`,
       },
       body: JSON.stringify({
         repo,
@@ -44,22 +71,27 @@ export = (app: Probot) => {
       }),
     });
 
-    if (res.status !== 400) {
-      context.log.info('Issue occurred');
+    if (res.status !== 200) {
+      context.log.error(`An issue occurred (response code: ${res.status}): ${await res.text()}`);
+      return;
     }
 
-    if (res.status === 409) {
-      context.log.info('Claim already exists');
+    const response = await res.json();
+
+    if (response.newClaims.length === 0) {
+      context.log.info('No new claims were created by this PR');
+      return;
     }
 
-    context.log.info('PR HAS BEEN REOPENED');
-    if (res.status === 200) {
-      context.log.info('Claim created successfully - post comment on PR');
-      const issueComment = context.issue({
-        body: `Thanks for opening PR #${pullRequestNum}!`,
-      });
-      await context.octokit.issues.createComment(issueComment);
-    }
+    context.log.info(`${response.newClaims.length} new Claims were created by this PR`);
+
+    const issueComment = context.issue({
+      body: generateComment(response.newClaims),
+    });
+
+    await context.octokit.issue.createComment(issueComment);
+
+    context.log.info('Posted comment about new claims');
   });
 
   app.on('pull_request.closed', async (context) => {
