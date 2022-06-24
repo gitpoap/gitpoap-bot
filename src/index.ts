@@ -1,6 +1,7 @@
 import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
 import * as Sentry from '@sentry/node';
+import { createTokenAuth } from '@octokit/auth-token';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -48,10 +49,11 @@ export = (app: Probot) => {
   app.on('pull_request.reopened', async (context: Context) => {
     console.log('IN THE REPOPENED HANDLER');
 
-    const github = await app.auth(); // Not passing an id returns a JWT-authenticated client
-    const tokenData = await github.apps.createInstallationAccessToken({
+    const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
+    const tokenData = await octokit.apps.createInstallationAccessToken({
       installation_id: context.payload.installation.id,
     });
+    const jwt = await octokit.auth({ type: 'app' }) as { token: string };
 
     const repo = context.payload.repository.name;
     const owner = context.payload.repository.owner.login;
@@ -62,7 +64,7 @@ export = (app: Probot) => {
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${tokenData.data.token}`,
+        Authorization: `Bearer ${jwt.token}`,
       },
       body: JSON.stringify({
         repo,
