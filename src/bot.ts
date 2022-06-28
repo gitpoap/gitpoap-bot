@@ -41,7 +41,7 @@ function generateComment(claims: BotClaimData[]): string {
   return comment;
 }
 
-export = (app: Probot) => {
+export default (app: Probot) => {
   app.on('pull_request.closed', async (context: Context) => {
     // Don't handle closed but not merged PRs
     if (!context.payload.pull_request.merged) {
