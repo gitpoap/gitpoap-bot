@@ -21,8 +21,6 @@ type BotClaimData = {
 };
 
 function generateComment(claims: BotClaimData[]): string {
-  // TODO: @colfax figure out exact copy to put in this...
-
   let qualifier: string;
   if (claims.length > 1) {
     qualifier = `some GitPOAPs`;
@@ -30,25 +28,21 @@ function generateComment(claims: BotClaimData[]): string {
     qualifier = `a GitPOAP`;
   }
 
-  let comment = `Woohoo, your important contribution to this open source project has earned you ${qualifier}!\nEarned:`;
+  let comment = `Woohoo, your important contribution to this open-source project has earned you ${qualifier}!\n`;
 
   for (const claim of claims) {
     comment += `
-* [**${claim.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id})
-    ![${claim.name} Token](${claim.imageUrl})
-    - ${claim.description}`
+[**${claim.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id}):
+<img src="${claim.imageUrl}" height="200px">`
   }
 
-  comment += '\n\nHead over to the [GitPOAP Site](https://www.gitpoap.io) to mint your new GitPOAPs!';
+  comment += '\n\nHead on over to [GitPOAP.io](https://www.gitpoap.io) and connect your GitHub account to mint!';
 
   return comment;
 }
 
 export = (app: Probot) => {
-  /* Eventually turn into pull_request.merged */
-  app.on('pull_request.reopened', async (context: Context) => {
-    console.log('IN THE REPOPENED HANDLER');
-
+  app.on('pull_request.merged', async (context: Context) => {
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const tokenData = await octokit.apps.createInstallationAccessToken({
       installation_id: context.payload.installation.id,
@@ -91,20 +85,22 @@ export = (app: Probot) => {
       body: generateComment(response.newClaims),
     });
 
-    await context.octokit.issues.createComment(issueComment);
+    const result = await context.octokit.issues.createComment(issueComment);
 
-    context.log.info('Posted comment about new claims');
+    context.log.info(`Posted comment about new claims: ${result.data.html_url}`);
   });
 
-  app.on('pull_request.closed', async (context) => {
-    const pullRequestNum = context.payload.pull_request.number;
-    const issueComment = context.issue({
-      body: `Thanks for CLOSING PR #${pullRequestNum}!`,
-    });
-
-    context.log.info(context.payload.repository.owner);
-
-    context.log.info('PR HAS BEEN CLOSED');
-    await context.octokit.issues.createComment(issueComment);
-  });
+// Useful for testing purposes:
+//
+//  app.on('pull_request.closed', async (context) => {
+//    const pullRequestNum = context.payload.pull_request.number;
+//    const issueComment = context.issue({
+//      body: `Thanks for CLOSING PR #${pullRequestNum}!`,
+//    });
+//
+//    context.log.info(context.payload.repository.owner);
+//
+//    context.log.info('PR HAS BEEN CLOSED');
+//    await context.octokit.issues.createComment(issueComment);
+//  });
 };
