@@ -42,16 +42,23 @@ function generateComment(claims: BotClaimData[]): string {
 }
 
 export = (app: Probot) => {
-  app.on('pull_request.merged', async (context: Context) => {
+  app.on('pull_request.closed', async (context: Context) => {
+    // Don't handle closed but not merged PRs
+    if (!context.payload.pull_request.merged) {
+      return;
+    }
+
+    const repo = context.payload.repository.name;
+    const owner = context.payload.repository.owner.login;
+    const pullRequestNumber = context.payload.number;
+
+    context.log.info(`Handling newly merged PR: https://github.com/${owner}/${repo}/${pullRequestNumber}`);
+
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const tokenData = await octokit.apps.createInstallationAccessToken({
       installation_id: context.payload.installation.id,
     });
     const jwt = await octokit.auth({ type: 'app' }) as { token: string };
-
-    const repo = context.payload.repository.name;
-    const owner = context.payload.repository.owner.login;
-    const pullRequestNumber = context.payload.number;
 
     const res = await fetch(`${process.env.API_URL}/claims/gitpoap-bot/create`, {
       method: 'POST',
