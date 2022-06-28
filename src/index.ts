@@ -1,5 +1,14 @@
 import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
+import * as Sentry from '@sentry/node';
+
+/* @probot/pino automatically picks up SENTRY_DSN from .env */
+Sentry.init({
+  environment: process.env.NODE_ENV,
+  /* Do not send errors to sentry if app is in development mode */
+  enabled: process.env.NODE_ENV !== 'development',
+  tracesSampleRate: 1.0,
+});
 
 export = (app: Probot) => {
   /* Eventually turn into pull_request.merged */
