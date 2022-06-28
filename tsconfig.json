@@ -12,7 +12,7 @@
     // "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
     "sourceMap": true /* Generates corresponding '.map' file. */,
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
-    "outDir": "./lib" /* Redirect output structure to the directory. */,
+    "outDir": "./public" /* Redirect output structure to the directory. */,
 
     /* Strict Type-Checking Options */
     "strict": true /* Enable all strict type-checking options. */,
