@@ -12,10 +12,10 @@
     "probot-app"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc; probot run ./public/index.js",
-    "start": "probot run ./public/index.js",
-    "test": "jest"
+    "build": "npx tsc",
+    "dev": "npx tsc; npx probot run ./public/index.js",
+    "start": "npx probot run ./public/index.js",
+    "test": "npx jest"
   },
   "dependencies": {
     "cross-fetch": "^3.1.5",
