@@ -1,6 +1,6 @@
-import { Context, Probot } from 'probot';
-import { fetch } from 'cross-fetch';
-import * as Sentry from '@sentry/node';
+const { Context, Probot } = require('probot');
+const { fetch } = require('cross-fetch');
+const Sentry = require('@sentry/node)';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -10,16 +10,7 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-// Should be the same as in gitpoap-backend/src/routes/claims.ts
-type BotClaimData = {
-  id: number;
-  gitPOAP: { id: number; poapEventId: number; threshold: number };
-  name: string;
-  imageUrl: string;
-  description: string;
-};
-
-function generateComment(claims: BotClaimData[]): string {
+function generateComment(claims) {
   let qualifier: string;
   if (claims.length > 1) {
     qualifier = `some GitPOAPs`;
@@ -41,8 +32,8 @@ function generateComment(claims: BotClaimData[]): string {
   return comment;
 }
 
-export default (app: Probot) => {
-  app.on('pull_request.closed', async (context: Context<'pull_request.closed'>) => {
+module.exports = (app) => {
+  app.on('pull_request.closed', async (context) => {
     // Don't handle closed but not merged PRs
     if (!context.payload.pull_request.merged) {
       return;
@@ -57,7 +48,7 @@ export default (app: Probot) => {
     );
 
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
-    const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
+    const jwt = await octokit.auth({ type: 'app' });
 
     const res = await fetch(`${process.env.API_URL}/claims/gitpoap-bot/create`, {
       method: 'POST',
