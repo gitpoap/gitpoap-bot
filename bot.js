@@ -1,6 +1,6 @@
 const { Context, Probot } = require('probot');
 const { fetch } = require('cross-fetch');
-const Sentry = require('@sentry/node)';
+const Sentry = require('@sentry/node');
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
