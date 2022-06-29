@@ -3,5 +3,5 @@ import app from '../src/bot';
 
 export default createNodeMiddleware(app, {
   probot: createProbot(),
-  webhooksPath: '/api/github/webhooks',
+  webhooksPath: '/api/index.ts',
 });
