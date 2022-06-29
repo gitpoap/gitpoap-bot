@@ -1,7 +1,7 @@
 {
   "functions": {
-    "/api/github/webhooks/index.js": {
-      "includeFiles": "/bot.js"
+    "api/github/webhooks/index.js": {
+      "includeFiles": "bot.js"
     }
   }
 }
