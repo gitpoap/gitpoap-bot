@@ -1,5 +1,5 @@
 import { createNodeMiddleware, createProbot } from 'probot';
-import app from '../../../bot';
+import app from '../../../src/bot';
 
 export default createNodeMiddleware(app, {
   probot: createProbot(),
