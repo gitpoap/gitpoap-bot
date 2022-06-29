@@ -13,8 +13,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsc; probot run ./public/index.js",
-    "start": "probot run ./public/index.js",
+    "dev": "tsc; probot run ./public/bot.js",
+    "start": "probot run ./public/bot.js",
     "test": "jest"
   },
   "dependencies": {
