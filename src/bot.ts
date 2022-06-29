@@ -1,7 +1,6 @@
 import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
 import * as Sentry from '@sentry/node';
-import { createTokenAuth } from '@octokit/auth-token';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -33,10 +32,11 @@ function generateComment(claims: BotClaimData[]): string {
   for (const claim of claims) {
     comment += `
 [**${claim.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id}):
-<img src="${claim.imageUrl}" height="200px">`
+<img src="${claim.imageUrl}" height="200px">`;
   }
 
-  comment += '\n\nHead on over to [GitPOAP.io](https://www.gitpoap.io) and connect your GitHub account to mint!';
+  comment +=
+    '\n\nHead on over to [GitPOAP.io](https://www.gitpoap.io) and connect your GitHub account to mint!';
 
   return comment;
 }
@@ -52,13 +52,12 @@ export default (app: Probot) => {
     const owner = context.payload.repository.owner.login;
     const pullRequestNumber = context.payload.number;
 
-    context.log.info(`Handling newly merged PR: https://github.com/${owner}/${repo}/${pullRequestNumber}`);
+    context.log.info(
+      `Handling newly merged PR: https://github.com/${owner}/${repo}/${pullRequestNumber}`,
+    );
 
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
-    const tokenData = await octokit.apps.createInstallationAccessToken({
-      installation_id: context.payload.installation.id,
-    });
-    const jwt = await octokit.auth({ type: 'app' }) as { token: string };
+    const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
 
     const res = await fetch(`${process.env.API_URL}/claims/gitpoap-bot/create`, {
       method: 'POST',
@@ -97,17 +96,17 @@ export default (app: Probot) => {
     context.log.info(`Posted comment about new claims: ${result.data.html_url}`);
   });
 
-// Useful for testing purposes:
-//
-//  app.on('pull_request.closed', async (context) => {
-//    const pullRequestNum = context.payload.pull_request.number;
-//    const issueComment = context.issue({
-//      body: `Thanks for CLOSING PR #${pullRequestNum}!`,
-//    });
-//
-//    context.log.info(context.payload.repository.owner);
-//
-//    context.log.info('PR HAS BEEN CLOSED');
-//    await context.octokit.issues.createComment(issueComment);
-//  });
+  // Useful for testing purposes:
+  //
+  //  app.on('pull_request.closed', async (context) => {
+  //    const pullRequestNum = context.payload.pull_request.number;
+  //    const issueComment = context.issue({
+  //      body: `Thanks for CLOSING PR #${pullRequestNum}!`,
+  //    });
+  //
+  //    context.log.info(context.payload.repository.owner);
+  //
+  //    context.log.info('PR HAS BEEN CLOSED');
+  //    await context.octokit.issues.createComment(issueComment);
+  //  });
 };
