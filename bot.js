@@ -11,7 +11,7 @@ Sentry.init({
 });
 
 function generateComment(claims) {
-  let qualifier: string;
+  let qualifier;
   if (claims.length > 1) {
     qualifier = `some GitPOAPs`;
   } else {
