@@ -32,7 +32,7 @@ function generateComment(claims: BotClaimData[]): string {
   for (const claim of claims) {
     comment += `
 [**${claim.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id}):
-<img src="${claim.imageUrl}" height="200px">`;
+<img alt="${claim.name} GitPOAP Badge" src="${claim.imageUrl}" height="200px">`;
   }
 
   comment +=
