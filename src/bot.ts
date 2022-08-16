@@ -56,6 +56,14 @@ export default (app: Probot) => {
       `Handling newly merged PR: https://github.com/${owner}/${repo}/${pullRequestNumber}`,
     );
 
+    // Skip claims creation API request if the creator of the PR is a bot
+    if (context.payload.pull_request.user.type === 'Bot') {
+      context.log.info(
+        `Skipping creating claims for PR made by bot "${context.payload.pull_request.user.login}"`
+      );
+      return;
+    }
+
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
 
