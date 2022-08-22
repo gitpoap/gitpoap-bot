@@ -1,6 +1,6 @@
 # gitpoap-bot
 
-> A GitHub App built with [Probot](https://github.com/probot/probot) that A Probot app
+> A GitHub App built with [Probot](https://github.com/probot/probot) that notifies users when a contribution has earned them a GitPOAP on opted-in & supported repositories.
 
 ## Setup
 
