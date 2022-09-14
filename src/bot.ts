@@ -102,14 +102,8 @@ export default (app: Probot) => {
     // fetch github ids
     const contributorGithubIds: number[] = [];
     for(let contributor of uniqueContributors) {
-      const res = await context.octokit.users.getByUsername({
-        username: contributor
-      });
-      const user = res.data;
-
-      if(user && user.id) {
-        contributorGithubIds.push(user?.id)
-      }
+      const id: number = await fetch(`https://api.github.com/users/${contributor}`).then(res => res.json()).then(res => res.id);
+      contributorGithubIds.push(id)
     }
     // if there are no contributors tagged, we award GitPOAP(s) to the PR/issue creator
     if(contributorGithubIds.length === 0) {
