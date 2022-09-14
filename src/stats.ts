@@ -4,15 +4,15 @@ const PER_PAGE = 100;
 
 function getApp() {
   return new App({
-    appId: process.env.APP_ID,
-    privateKey: process.env.PRIVATE_KEY,
+    appId: process.env.APP_ID ?? "",
+    privateKey: process.env.PRIVATE_KEY ?? "",
   });
 }
 
 export async function getBotInstalls() {
   const app = getApp();
 
-  let results = [];
+  let results: any = [];
 
   let page = 1;
   for (let count = PER_PAGE; count === PER_PAGE; ++page) {
