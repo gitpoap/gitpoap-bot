@@ -21,6 +21,8 @@ export default (app: Probot) => {
     const repo = context.payload.repository.name;
     const owner = context.payload.repository.owner.login;
     const pullRequestNumber = context.payload.number;
+    const senderId = context.payload.pull_request.user.id;
+    const organization = context.payload.organization?.login ?? "";
 
     context.log.info(
       `Handling newly merged PR: https://github.com/${owner}/${repo}/${pullRequestNumber}`,
@@ -45,9 +47,13 @@ export default (app: Probot) => {
         Authorization: `Bearer ${jwt.token}`,
       },
       body: JSON.stringify({
-        repo,
-        owner,
-        pullRequestNumber,
+        pullRequest: {
+          organization,
+          repo,
+          pullRequestNumber: pullRequestNumber,
+          contributorGithubIds: [senderId],
+          wasEarnedByMention: false
+        }
       }),
     });
 
@@ -133,7 +139,7 @@ export default (app: Probot) => {
         repo,
         issueNumber,
         contributorGithubIds,
-        wasEarnedByMention: false
+        wasEarnedByMention: true
       }
     }
 
