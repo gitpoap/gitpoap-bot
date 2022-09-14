@@ -148,12 +148,11 @@ export default (app: Probot) => {
     }
     // check if comment taggged gitpoap-bot
     if(!comment.includes("@gitpoap-bot")) {
-      context.log.info(`Sender didn't tag @gitpoap-bot in this comment`);
       return;
     }
     // parse followed tagged contributors
     const tagBody = comment.split("@gitpoap-bot ")[1];
-    const contributors = tagBody?.match(/@\w*/g)?.map(contributor => contributor.replace("@", "")).filter(contributor => contributor) ?? [];
+    const contributors = tagBody?.match(/@\w*/g)?.map(ele => ele.replace("@", "")).filter(ele => ele) ?? [];
     const uniqueContributors =  Array.from(new Set(contributors));
     // fetch github ids
     const contributorGithubIds: number[] = [];
@@ -161,7 +160,7 @@ export default (app: Probot) => {
       const id: number = await fetch(`https://api.github.com/users/${contributor}`).then(res => res.json()).then(res => res.id);
       contributorGithubIds.push(id)
     }
-    // if there are no contributors tagged, we award GitPOAP(s) to the PR/issue creator
+    // if there is no contributors tagged, we are going to awerad GitPOAP to PR/issue creator
     if(contributorGithubIds.length === 0) {
       contributorGithubIds.push(issueCreatorId);
     }
