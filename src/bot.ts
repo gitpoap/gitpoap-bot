@@ -143,10 +143,9 @@ export default (app: Probot) => {
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
 
     // check if comment sender is repo owner
-    // TODO; uncomment after testing
-    // if(owner !== sender) {
-    //   return;
-    // }
+    if(owner !== sender) {
+      return;
+    }
     // check if comment taggged gitpoap-bot
     if(!comment.includes("@gitpoap-bot")) {
       return;
