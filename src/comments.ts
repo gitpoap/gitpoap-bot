@@ -1,11 +1,8 @@
 // Should be the same as in gitpoap-backend/src/routes/claims.ts
 type BotClaimData = {
     id: number;
-    gitPOAP: { id: number; poapEventId: number; threshold: number };
-    user: { githubHandle: string },
-    name: string;
-    imageUrl: string;
-    description: string;
+    gitPOAP: { id: number; name: string; imageUrl: string; description: string; threshold: number };
+    user: { githubHandle: string };
   };
   
 export function generateComment(claims: BotClaimData[]): string {
@@ -19,10 +16,10 @@ export function generateComment(claims: BotClaimData[]): string {
     let comment = `Woohoo, your important contribution to this open-source project has earned you ${qualifier}!\n`;
   
     for (const claim of claims) {
-      if (claim.gitPOAP.id && claim.name && claim.imageUrl ) {
+      if (claim.gitPOAP.id && claim.gitPOAP.name && claim.gitPOAP.imageUrl ) {
         comment += `
-[**${claim.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id}):
-<img alt="${claim.name} GitPOAP Badge" src="${claim.imageUrl}" height="200px">`;
+[**${claim.gitPOAP.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id}):
+<img alt="${claim.gitPOAP.name} GitPOAP Badge" src="${claim.gitPOAP.imageUrl}" height="200px">`;
       }
     }
   
@@ -46,9 +43,11 @@ export function generateIssueComment(claims: BotClaimData[]): string {
     let comment = `Congrats, ${receiversTag}! You've earned ${qualifier} for your contribution!\n`;
   
     for (const claim of claims) {
+      if (claim.gitPOAP.id && claim.gitPOAP.name && claim.gitPOAP.imageUrl ) {
       comment += `
-[**${claim.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id}):
-<img alt="${claim.name} GitPOAP Badge" src="${claim.imageUrl}" height="200px">`;
+[**${claim.gitPOAP.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id}):
+<img alt="${claim.gitPOAP.name} GitPOAP Badge" src="${claim.gitPOAP.imageUrl}" height="200px">`;
+      }
     }
   
     comment +=
