@@ -91,7 +91,7 @@ export default (app: Probot) => {
     const htmlURL = context.payload.issue.html_url;
 
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
-
+    
     // check if comment sender is repo owner
     if (owner !== sender) {
       return;
