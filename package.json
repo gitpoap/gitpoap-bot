@@ -25,6 +25,7 @@
     "probot": "^12.2.4"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.12",
     "@types/jest": "^26.0.19",
     "@types/node": "^14.14.19",
     "husky": "^8.0.0",
