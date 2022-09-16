@@ -19,9 +19,11 @@ export function generateComment(claims: BotClaimData[]): string {
     let comment = `Woohoo, your important contribution to this open-source project has earned you ${qualifier}!\n`;
   
     for (const claim of claims) {
+      if (claim.gitPOAP.id && claim.name && claim.imageUrl ) {
         comment += `
 [**${claim.name}**](https://www.gitpoap.io/gp/${claim.gitPOAP.id}):
 <img alt="${claim.name} GitPOAP Badge" src="${claim.imageUrl}" height="200px">`;
+      }
     }
   
     comment +=
