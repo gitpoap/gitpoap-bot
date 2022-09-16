@@ -15,7 +15,8 @@
     "build": "tsc",
     "dev": "tsc; probot run ./lib/bot.js",
     "start": "probot run ./lib/bot.js",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky install"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -26,7 +27,9 @@
   "devDependencies": {
     "@types/jest": "^26.0.19",
     "@types/node": "^14.14.19",
+    "husky": "^8.0.0",
     "jest": "^26.6.3",
+    "lint-staged": "^13.0.3",
     "nock": "^13.0.5",
     "smee-client": "^1.2.2",
     "ts-jest": "^26.4.4",
@@ -35,5 +38,10 @@
   },
   "engines": {
     "node": ">= 10.13.0"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "npx prettier --write"
+    ]
   }
 }
