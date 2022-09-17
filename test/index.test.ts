@@ -8,11 +8,49 @@ import { Probot, ProbotOctokit } from 'probot';
 // Requiring our fixtures
 import issuePayload from './fixtures/issue_comment.created_issue.json';
 import prPayload from './fixtures/issue_comment.created_pr.json';
+import nonOwnerPayload from './fixtures/issue_comment.created_non_owner.json';
 import { generateIssueComment } from '../src/comments';
 const fs = require('fs');
 const path = require('path');
 
 const privateKey = fs.readFileSync(path.join(__dirname, 'fixtures/mock-cert.pem'), 'utf-8');
+
+const newClaims = [
+  {
+    id: 1,
+    user: { githubHandle: 'test' },
+    gitPOAP: {
+      id: 15,
+      name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
+      imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
+      description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
+      threshold: 1
+    }
+  },
+  {
+    id: 2,
+    user: { githubHandle: 'test' },
+    gitPOAP: {
+      id: 16,
+      name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
+      imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
+      description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
+      threshold: 1
+    }
+  },
+  {
+    id: 3,
+    user: { githubHandle: 'test' },
+    gitPOAP: {
+      id: 17,
+      name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
+      imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
+      description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
+      threshold: 1
+    }
+  }
+];
+const issueCreatedBody = { body: generateIssueComment(newClaims) };
 
 describe('gitpoap-bot', () => {
   let probot: any;
@@ -33,43 +71,6 @@ describe('gitpoap-bot', () => {
   });
 
   it('should create a comment on the issue if repo owner tagged gitpoap-bot and contributors on an issue comment', async (done) => {
-    const newClaims = [
-      {
-        id: 1,
-        user: { githubHandle: 'test' },
-        gitPOAP: {
-          id: 15,
-          name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-          imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-          description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-          threshold: 1
-        }
-      },
-      {
-        id: 2,
-        user: { githubHandle: 'test' },
-        gitPOAP: {
-          id: 16,
-          name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-          imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-          description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-          threshold: 1
-        }
-      },
-      {
-        id: 3,
-        user: { githubHandle: 'test' },
-        gitPOAP: {
-          id: 17,
-          name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-          imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-          description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-          threshold: 1
-        }
-      }
-    ];
-    const issueCreatedBody = { body: generateIssueComment(newClaims) };
-
     const githubAPIMock = nock('https://api.github.com')
       // Test that we correctly return a test token
       .post('/app/installations/29153052/access_tokens')
@@ -108,7 +109,6 @@ describe('gitpoap-bot', () => {
         newClaims
       });
 
-      console.log("issuePayload", issuePayload)
     // Receive a webhook event
     await probot.receive({ name: 'issue_comment', payload: issuePayload });
 
@@ -117,43 +117,6 @@ describe('gitpoap-bot', () => {
   });
 
   it('should create a comment on the PR if repo owner tagged gitpoap-bot and contributors on an PR comment', async (done) => {
-    const newClaims = [
-      {
-        id: 1,
-        user: { githubHandle: 'test' },
-        gitPOAP: {
-          id: 15,
-          name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-          imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-          description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-          threshold: 1
-        }
-      },
-      {
-        id: 2,
-        user: { githubHandle: 'test' },
-        gitPOAP: {
-          id: 16,
-          name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-          imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-          description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-          threshold: 1
-        }
-      },
-      {
-        id: 3,
-        user: { githubHandle: 'test' },
-        gitPOAP: {
-          id: 17,
-          name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-          imageUrl: 'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-          description: 'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-          threshold: 1
-        }
-      }
-    ];
-    const issueCreatedBody = { body: generateIssueComment(newClaims) };
-
     const githubAPIMock = nock('https://api.github.com')
       // Test that we correctly return a test token
       .post('/app/installations/29153052/access_tokens')
@@ -197,6 +160,55 @@ describe('gitpoap-bot', () => {
 
     expect(githubAPIMock.activeMocks()).toStrictEqual([]);
     expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+  });
+
+  it('should not create a comment on the issue if non repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
+    const githubAPIMock = nock('https://api.github.com')
+      // Test that we correctly return a test token
+      .post('/app/installations/29153052/access_tokens')
+      .reply(200, {
+        token: 'test',
+        permissions: {
+          issues: 'write',
+        },
+      })
+
+      // get github login ids
+      .get('/users/test1')
+      .reply(200, {
+        "id": 1,
+      })
+      .get('/users/test2')
+      .reply(200, {
+        "id": 2,
+      })
+      .get('/users/test3')
+      .reply(200, {
+        "id": 3,
+      })
+
+      // Test that a comment is posted
+      .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments')
+      .reply(200);
+
+    // Test response from gitpoap api
+    const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+      .post(`/claims/gitpoap-bot/create`)
+      .reply(200, {
+        newClaims
+      });
+
+    // Receive a webhook event
+    await probot.receive({ name: 'issue_comment', payload: nonOwnerPayload });
+
+    expect(githubAPIMock.activeMocks()).toStrictEqual([
+      "POST https://api.github.com:443/app/installations/29153052/access_tokens",
+      "GET https://api.github.com:443/users/test1",
+      "GET https://api.github.com:443/users/test2",
+      "GET https://api.github.com:443/users/test3",
+      "POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments",
+    ]);
+    expect(gitpoapAPIMock.activeMocks()).toStrictEqual([`POST ${process.env.API_URL}/claims/gitpoap-bot/create`]);
   });
 
   afterEach(() => {
