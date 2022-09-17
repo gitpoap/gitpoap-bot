@@ -162,7 +162,7 @@ describe('gitpoap-bot', () => {
     expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
   });
 
-  it('should not create a comment on the issue if non repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
+  it('should not do anything if non repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
     const githubAPIMock = nock('https://api.github.com')
       // Test that we correctly return a test token
       .post('/app/installations/29153052/access_tokens')
@@ -209,6 +209,49 @@ describe('gitpoap-bot', () => {
       "POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments",
     ]);
     expect(gitpoapAPIMock.activeMocks()).toStrictEqual([`POST ${process.env.API_URL}/claims/gitpoap-bot/create`]);
+  });
+
+  it('should not create a comment on the PR if no claims are claimed', async () => {
+    const githubAPIMock = nock('https://api.github.com')
+      // Test that we correctly return a test token
+      .post('/app/installations/29153052/access_tokens')
+      .reply(200, {
+        token: 'test',
+        permissions: {
+          issues: 'write',
+        },
+      })
+
+      // get github login ids
+      .get('/users/test1')
+      .reply(200, {
+        "id": 1,
+      })
+      .get('/users/test2')
+      .reply(200, {
+        "id": 2,
+      })
+      .get('/users/test3')
+      .reply(200, {
+        "id": 3,
+      })
+
+      // Test that a comment is posted
+      .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments')
+      .reply(200);
+
+    // Test response from gitpoap api
+    const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+      .post(`/claims/gitpoap-bot/create`)
+      .reply(200, {
+        newClaims: []
+      });
+
+    // Receive a webhook event
+    await probot.receive({ name: 'issue_comment', payload: prPayload });
+
+    expect(githubAPIMock.activeMocks()).toStrictEqual(["POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments"]);
+    expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
   });
 
   afterEach(() => {
