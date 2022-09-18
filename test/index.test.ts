@@ -10,6 +10,7 @@ import issueCommentPayload from './fixtures/issue_comment.created_issue.json';
 import prCommentPayload from './fixtures/issue_comment.created_pr.json';
 import nonOwnerPayload from './fixtures/issue_comment.created_non_owner.json';
 import prClosedPayload from './fixtures/pull_request.closed.json';
+import nonMergedPrClosedPayload from './fixtures/pull_request.closed_non_merged.json';
 import { generateIssueComment, generateComment } from '../src/comments';
 const fs = require('fs');
 const path = require('path');
@@ -72,221 +73,289 @@ describe('gitpoap-bot', () => {
     probot.load(myProbotApp);
   });
 
-  it('should create a comment on the issue if repo owner tagged gitpoap-bot and contributors on an issue comment', async (done) => {
-    const githubAPIMock = nock('https://api.github.com')
-      // Test that we correctly return a test token
-      .post('/app/installations/29153052/access_tokens')
-      .reply(200, {
-        token: 'test',
-        permissions: {
-          issues: 'write',
-        },
-      })
+  describe("Issue Comment", async function() {
+    it('should create a comment on the issue if repo owner tagged gitpoap-bot and contributors on an issue comment', async (done) => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+  
+        // get github login ids
+        .get('/users/test1')
+        .reply(200, {
+          "id": 1,
+        })
+        .get('/users/test2')
+        .reply(200, {
+          "id": 2,
+        })
+        .get('/users/test3')
+        .reply(200, {
+          "id": 3,
+        })
+  
+        // Test that a comment is posted
+        .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments', (body: any) => {
+          done(expect(body).toMatchObject(issueCreatedBody));
+          return true;
+        })
+        .reply(200);
+  
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims
+        });
+  
+      // Receive a webhook event
+      await probot.receive({ name: 'issue_comment', payload: issueCommentPayload });
+  
+      expect(githubAPIMock.activeMocks()).toStrictEqual([]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+    });
+  
+    it('should create a comment on the PR if repo owner tagged gitpoap-bot and contributors on an PR comment', async (done) => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+  
+        // get github login ids
+        .get('/users/test1')
+        .reply(200, {
+          "id": 1,
+        })
+        .get('/users/test2')
+        .reply(200, {
+          "id": 2,
+        })
+        .get('/users/test3')
+        .reply(200, {
+          "id": 3,
+        })
+  
+        // Test that a comment is posted
+        .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments', (body: any) => {
+          done(expect(body).toMatchObject(issueCreatedBody));
+          return true;
+        })
+        .reply(200);
+  
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims
+        });
+  
+      // Receive a webhook event
+      await probot.receive({ name: 'issue_comment', payload: prCommentPayload });
+  
+      expect(githubAPIMock.activeMocks()).toStrictEqual([]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+    });
+  
+    it('should not do anything if non repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+  
+        // get github login ids
+        .get('/users/test1')
+        .reply(200, {
+          "id": 1,
+        })
+        .get('/users/test2')
+        .reply(200, {
+          "id": 2,
+        })
+        .get('/users/test3')
+        .reply(200, {
+          "id": 3,
+        })
+  
+        // Test that a comment is posted
+        .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments')
+        .reply(200);
+  
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims
+        });
+  
+      // Receive a webhook event
+      await probot.receive({ name: 'issue_comment', payload: nonOwnerPayload });
+  
+      expect(githubAPIMock.activeMocks()).toStrictEqual([
+        "POST https://api.github.com:443/app/installations/29153052/access_tokens",
+        "GET https://api.github.com:443/users/test1",
+        "GET https://api.github.com:443/users/test2",
+        "GET https://api.github.com:443/users/test3",
+        "POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments",
+      ]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([`POST ${process.env.API_URL}/claims/gitpoap-bot/create`]);
+    });
+  
+    it('should not create a comment on the PR if no claims are claimed', async () => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+  
+        // get github login ids
+        .get('/users/test1')
+        .reply(200, {
+          "id": 1,
+        })
+        .get('/users/test2')
+        .reply(200, {
+          "id": 2,
+        })
+        .get('/users/test3')
+        .reply(200, {
+          "id": 3,
+        })
+  
+        // Test that a comment is posted
+        .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments')
+        .reply(200);
+  
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims: []
+        });
+  
+      // Receive a webhook event
+      await probot.receive({ name: 'issue_comment', payload: prCommentPayload });
+  
+      expect(githubAPIMock.activeMocks()).toStrictEqual(["POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments"]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+    });  
+  })
 
-      // get github login ids
-      .get('/users/test1')
-      .reply(200, {
-        "id": 1,
-      })
-      .get('/users/test2')
-      .reply(200, {
-        "id": 2,
-      })
-      .get('/users/test3')
-      .reply(200, {
-        "id": 3,
-      })
+  describe("PR Close", async function(){
+    it('should create a comment on the PR if PR is closed with merge', async (done) => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+  
+        // Test that a comment is posted
+        .post('/repos/Codertocat/Hello-World/issues/2/comments', (body: any) => {
+          done(expect(body).toMatchObject(prClosedIssueCommentBody));
+          return true;
+        })
+        .reply(200);
+  
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims
+        });
+  
+      // Receive a webhook event
+      await probot.receive({ name: 'pull_request', payload: prClosedPayload });
+  
+      expect(githubAPIMock.activeMocks()).toStrictEqual([]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+    });
 
-      // Test that a comment is posted
-      .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments', (body: any) => {
-        done(expect(body).toMatchObject(issueCreatedBody));
-        return true;
-      })
-      .reply(200);
+    it('should not create a comment on the PR if there are no new claims from API', async () => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+  
+        // Test that a comment is posted
+        .post('/repos/Codertocat/Hello-World/issues/2/comments')
+        .reply(200);
+  
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims: []
+        });
+  
+      // Receive a webhook event
+      await probot.receive({ name: 'pull_request', payload: prClosedPayload });
+  
+      expect(githubAPIMock.activeMocks()).toStrictEqual([
+        "POST https://api.github.com:443/app/installations/29153052/access_tokens",
+        "POST https://api.github.com:443/repos/Codertocat/Hello-World/issues/2/comments"
+      ]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+    });
 
-    // Test response from gitpoap api
-    const gitpoapAPIMock = nock(`${process.env.API_URL}`)
-      .post(`/claims/gitpoap-bot/create`)
-      .reply(200, {
-        newClaims
-      });
-
-    // Receive a webhook event
-    await probot.receive({ name: 'issue_comment', payload: issueCommentPayload });
-
-    expect(githubAPIMock.activeMocks()).toStrictEqual([]);
-    expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
-  });
-
-  it('should create a comment on the PR if repo owner tagged gitpoap-bot and contributors on an PR comment', async (done) => {
-    const githubAPIMock = nock('https://api.github.com')
-      // Test that we correctly return a test token
-      .post('/app/installations/29153052/access_tokens')
-      .reply(200, {
-        token: 'test',
-        permissions: {
-          issues: 'write',
-        },
-      })
-
-      // get github login ids
-      .get('/users/test1')
-      .reply(200, {
-        "id": 1,
-      })
-      .get('/users/test2')
-      .reply(200, {
-        "id": 2,
-      })
-      .get('/users/test3')
-      .reply(200, {
-        "id": 3,
-      })
-
-      // Test that a comment is posted
-      .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments', (body: any) => {
-        done(expect(body).toMatchObject(issueCreatedBody));
-        return true;
-      })
-      .reply(200);
-
-    // Test response from gitpoap api
-    const gitpoapAPIMock = nock(`${process.env.API_URL}`)
-      .post(`/claims/gitpoap-bot/create`)
-      .reply(200, {
-        newClaims
-      });
-
-    // Receive a webhook event
-    await probot.receive({ name: 'issue_comment', payload: prCommentPayload });
-
-    expect(githubAPIMock.activeMocks()).toStrictEqual([]);
-    expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
-  });
-
-  it('should not do anything if non repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
-    const githubAPIMock = nock('https://api.github.com')
-      // Test that we correctly return a test token
-      .post('/app/installations/29153052/access_tokens')
-      .reply(200, {
-        token: 'test',
-        permissions: {
-          issues: 'write',
-        },
-      })
-
-      // get github login ids
-      .get('/users/test1')
-      .reply(200, {
-        "id": 1,
-      })
-      .get('/users/test2')
-      .reply(200, {
-        "id": 2,
-      })
-      .get('/users/test3')
-      .reply(200, {
-        "id": 3,
-      })
-
-      // Test that a comment is posted
-      .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments')
-      .reply(200);
-
-    // Test response from gitpoap api
-    const gitpoapAPIMock = nock(`${process.env.API_URL}`)
-      .post(`/claims/gitpoap-bot/create`)
-      .reply(200, {
-        newClaims
-      });
-
-    // Receive a webhook event
-    await probot.receive({ name: 'issue_comment', payload: nonOwnerPayload });
-
-    expect(githubAPIMock.activeMocks()).toStrictEqual([
-      "POST https://api.github.com:443/app/installations/29153052/access_tokens",
-      "GET https://api.github.com:443/users/test1",
-      "GET https://api.github.com:443/users/test2",
-      "GET https://api.github.com:443/users/test3",
-      "POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments",
-    ]);
-    expect(gitpoapAPIMock.activeMocks()).toStrictEqual([`POST ${process.env.API_URL}/claims/gitpoap-bot/create`]);
-  });
-
-  it('should not create a comment on the PR if no claims are claimed', async () => {
-    const githubAPIMock = nock('https://api.github.com')
-      // Test that we correctly return a test token
-      .post('/app/installations/29153052/access_tokens')
-      .reply(200, {
-        token: 'test',
-        permissions: {
-          issues: 'write',
-        },
-      })
-
-      // get github login ids
-      .get('/users/test1')
-      .reply(200, {
-        "id": 1,
-      })
-      .get('/users/test2')
-      .reply(200, {
-        "id": 2,
-      })
-      .get('/users/test3')
-      .reply(200, {
-        "id": 3,
-      })
-
-      // Test that a comment is posted
-      .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments')
-      .reply(200);
-
-    // Test response from gitpoap api
-    const gitpoapAPIMock = nock(`${process.env.API_URL}`)
-      .post(`/claims/gitpoap-bot/create`)
-      .reply(200, {
-        newClaims: []
-      });
-
-    // Receive a webhook event
-    await probot.receive({ name: 'issue_comment', payload: prCommentPayload });
-
-    expect(githubAPIMock.activeMocks()).toStrictEqual(["POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments"]);
-    expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
-  });
-
-  it('should create a comment on the PR if PR is closed with merge', async (done) => {
-    const githubAPIMock = nock('https://api.github.com')
-      // Test that we correctly return a test token
-      .post('/app/installations/29153052/access_tokens')
-      .reply(200, {
-        token: 'test',
-        permissions: {
-          issues: 'write',
-        },
-      })
-
-      // Test that a comment is posted
-      .post('/repos/Codertocat/Hello-World/issues/2/comments', (body: any) => {
-        done(expect(body).toMatchObject(prClosedIssueCommentBody));
-        return true;
-      })
-      .reply(200);
-
-    // Test response from gitpoap api
-    const gitpoapAPIMock = nock(`${process.env.API_URL}`)
-      .post(`/claims/gitpoap-bot/create`)
-      .reply(200, {
-        newClaims
-      });
-
-    // Receive a webhook event
-    await probot.receive({ name: 'pull_request', payload: prClosedPayload });
-
-    expect(githubAPIMock.activeMocks()).toStrictEqual([]);
-    expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
-  });
+    it('should not do anything if PR is closed without merge', async () => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+  
+        // Test that a comment is posted
+        .post('/repos/Codertocat/Hello-World/issues/2/comments')
+        .reply(200);
+  
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims: []
+        });
+  
+      // Receive a webhook event
+      await probot.receive({ name: 'pull_request', payload: nonMergedPrClosedPayload });
+  
+      expect(githubAPIMock.activeMocks()).toStrictEqual([
+        "POST https://api.github.com:443/app/installations/29153052/access_tokens",
+        "POST https://api.github.com:443/repos/Codertocat/Hello-World/issues/2/comments"
+      ]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([`POST ${process.env.API_URL}/claims/gitpoap-bot/create`]);
+    });
+  })
 
   afterEach(() => {
     nock.cleanAll();
