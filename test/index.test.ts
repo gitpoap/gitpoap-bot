@@ -6,10 +6,11 @@ import nock from 'nock';
 import myProbotApp from '../src/bot';
 import { Probot, ProbotOctokit } from 'probot';
 // Requiring our fixtures
-import issuePayload from './fixtures/issue_comment.created_issue.json';
-import prPayload from './fixtures/issue_comment.created_pr.json';
+import issueCommentPayload from './fixtures/issue_comment.created_issue.json';
+import prCommentPayload from './fixtures/issue_comment.created_pr.json';
 import nonOwnerPayload from './fixtures/issue_comment.created_non_owner.json';
-import { generateIssueComment } from '../src/comments';
+import prClosedPayload from './fixtures/pull_request.closed.json';
+import { generateIssueComment, generateComment } from '../src/comments';
 const fs = require('fs');
 const path = require('path');
 
@@ -51,6 +52,7 @@ const newClaims = [
   }
 ];
 const issueCreatedBody = { body: generateIssueComment(newClaims) };
+const prClosedIssueCommentBody = { body: generateComment(newClaims) };
 
 describe('gitpoap-bot', () => {
   let probot: any;
@@ -110,7 +112,7 @@ describe('gitpoap-bot', () => {
       });
 
     // Receive a webhook event
-    await probot.receive({ name: 'issue_comment', payload: issuePayload });
+    await probot.receive({ name: 'issue_comment', payload: issueCommentPayload });
 
     expect(githubAPIMock.activeMocks()).toStrictEqual([]);
     expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
@@ -156,7 +158,7 @@ describe('gitpoap-bot', () => {
       });
 
     // Receive a webhook event
-    await probot.receive({ name: 'issue_comment', payload: prPayload });
+    await probot.receive({ name: 'issue_comment', payload: prCommentPayload });
 
     expect(githubAPIMock.activeMocks()).toStrictEqual([]);
     expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
@@ -248,9 +250,41 @@ describe('gitpoap-bot', () => {
       });
 
     // Receive a webhook event
-    await probot.receive({ name: 'issue_comment', payload: prPayload });
+    await probot.receive({ name: 'issue_comment', payload: prCommentPayload });
 
     expect(githubAPIMock.activeMocks()).toStrictEqual(["POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments"]);
+    expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+  });
+
+  it('should create a comment on the PR if PR is closed with merge', async (done) => {
+    const githubAPIMock = nock('https://api.github.com')
+      // Test that we correctly return a test token
+      .post('/app/installations/29153052/access_tokens')
+      .reply(200, {
+        token: 'test',
+        permissions: {
+          issues: 'write',
+        },
+      })
+
+      // Test that a comment is posted
+      .post('/repos/Codertocat/Hello-World/issues/2/comments', (body: any) => {
+        done(expect(body).toMatchObject(prClosedIssueCommentBody));
+        return true;
+      })
+      .reply(200);
+
+    // Test response from gitpoap api
+    const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+      .post(`/claims/gitpoap-bot/create`)
+      .reply(200, {
+        newClaims
+      });
+
+    // Receive a webhook event
+    await probot.receive({ name: 'pull_request', payload: prClosedPayload });
+
+    expect(githubAPIMock.activeMocks()).toStrictEqual([]);
     expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
   });
 
