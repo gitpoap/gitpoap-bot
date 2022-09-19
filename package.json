@@ -15,7 +15,7 @@
     "build": "tsc",
     "dev": "tsc; probot run ./lib/bot.js",
     "start": "probot run ./lib/bot.js",
-    "test": "jest --setupFiles dotenv/config",
+    "test": "jest --verbose --setupFiles dotenv/config",
     "prepare": "husky install"
   },
   "dependencies": {
