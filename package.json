@@ -42,8 +42,8 @@
     "node": ">= 10.13.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": [
-      "npx prettier --write"
+    "**/*.{js,jsx,ts,tsx, json}": [
+      "prettier --write"
     ]
   }
 }
