@@ -8,6 +8,7 @@ on:
 
 env:
   NEXT_PUBLIC_SENTRY_ENVIRONMENT: test
+  API_URL: https://api.gitpoap.io
 
 jobs:
   run-tests:
