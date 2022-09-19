@@ -91,16 +91,16 @@ export default (app: Probot) => {
     const htmlURL = context.payload.issue.html_url;
 
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
-    
+
     // get permissions
     const permissionRes = await context.octokit.rest.repos.getCollaboratorPermissionLevel({
       owner,
       repo,
-      username: sender
+      username: sender,
     });
     const permissions = permissionRes.data.user?.permissions;
     // check if user has admin, maintain or push permission
-    if(!permissions || (!permissions.admin && !permissions.push && !permissions.maintain)) {
+    if (!permissions || (!permissions.admin && !permissions.push && !permissions.maintain)) {
       context.log.info(`Sender doesn't have admin, maintain or push permission`);
       return;
     }
