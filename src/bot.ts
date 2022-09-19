@@ -99,6 +99,7 @@ export default (app: Probot) => {
       username: sender
     });
     const permissions = permissionRes.data.user?.permissions;
+    console.log("permissions",permissions);
     // check if user has admin, maintain or push permission
     if(!permissions || (!permissions.admin && !permissions.push && !permissions.maintain)) {
       context.log.info(`Sender doesn't have admin, maintain or push permission`);
