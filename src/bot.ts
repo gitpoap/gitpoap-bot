@@ -92,8 +92,16 @@ export default (app: Probot) => {
 
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
     
-    // check if comment sender is repo owner
-    if (owner !== sender) {
+    // get permissions
+    const permissionRes = await context.octokit.rest.repos.getCollaboratorPermissionLevel({
+      owner,
+      repo,
+      username: sender
+    });
+    const permissions = permissionRes.data.user?.permissions;
+    // check if user has admin, maintain or push permission
+    if(!permissions || (!permissions.admin && !permissions.push && !permissions.maintain)) {
+      context.log.info(`Sender doesn't have admin, maintain or push permission`);
       return;
     }
     // check if comment taggged gitpoap-bot
