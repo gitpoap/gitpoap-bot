@@ -1,10 +1,7 @@
-// You can import your modules
-// import index from '../src/index'
-
+import { Probot, ProbotOctokit } from 'probot';
 import nock from 'nock';
 // Requiring our app implementation
 import myProbotApp from '../src/bot';
-import { Probot, ProbotOctokit } from 'probot';
 // Requiring our fixtures
 import issueCommentPayload from './fixtures/issue_comment.created_issue.json';
 import prCommentPayload from './fixtures/issue_comment.created_pr.json';
@@ -79,8 +76,8 @@ describe('gitpoap-bot', () => {
     probot.load(myProbotApp);
   });
 
-  describe('Issue Comment', async function () {
-    it('should create a comment on the issue if repo owner tagged gitpoap-bot and contributors on an issue comment', async (done) => {
+  describe('Issue Comment', () => {
+    it('should create a comment on the issue if repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
       const githubAPIMock = nock('https://api.github.com')
         // Test that we correctly return a test token
         .post('/app/installations/29153052/access_tokens')
@@ -105,11 +102,18 @@ describe('gitpoap-bot', () => {
           id: 3,
         })
 
-        // Test that a comment is posted
-        .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments', (body: any) => {
-          done(expect(body).toMatchObject(issueCreatedBody));
-          return true;
+        // get permissions
+        .get('/repos/gitpoap/gitpoap-bot-test-repo/collaborators/gitpoap/permission')
+        .reply(200, {
+          user: {
+            permissions: {
+              admin: true,
+            },
+          },
         })
+
+        // Test that a comment is posted with the correct body
+        .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments', issueCreatedBody)
         .reply(200);
 
       // Test response from gitpoap api
@@ -126,7 +130,7 @@ describe('gitpoap-bot', () => {
       expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
     });
 
-    it('should create a comment on the PR if repo owner tagged gitpoap-bot and contributors on an PR comment', async (done) => {
+    it('should create a comment on the PR if repo owner tagged gitpoap-bot and contributors on an PR comment', async () => {
       const githubAPIMock = nock('https://api.github.com')
         // Test that we correctly return a test token
         .post('/app/installations/29153052/access_tokens')
@@ -151,11 +155,18 @@ describe('gitpoap-bot', () => {
           id: 3,
         })
 
-        // Test that a comment is posted
-        .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments', (body: any) => {
-          done(expect(body).toMatchObject(issueCreatedBody));
-          return true;
+        // get permissions
+        .get('/repos/gitpoap/gitpoap-bot-test-repo/collaborators/gitpoap/permission')
+        .reply(200, {
+          user: {
+            permissions: {
+              admin: true,
+            },
+          },
         })
+
+        // Test that a comment is posted with the correct body
+        .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments', issueCreatedBody)
         .reply(200);
 
       // Test response from gitpoap api
@@ -172,7 +183,7 @@ describe('gitpoap-bot', () => {
       expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
     });
 
-    it('should not do anything if non repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
+    it('should not do anything if non maintainer tagged gitpoap-bot and contributors on an issue comment', async () => {
       const githubAPIMock = nock('https://api.github.com')
         // Test that we correctly return a test token
         .post('/app/installations/29153052/access_tokens')
@@ -195,6 +206,18 @@ describe('gitpoap-bot', () => {
         .get('/users/test3')
         .reply(200, {
           id: 3,
+        })
+
+        // get permissions
+        .get('/repos/gitpoap/gitpoap-bot-test-repo/collaborators/tyler415git/permission')
+        .reply(200, {
+          user: {
+            permissions: {
+              admin: false,
+              maintain: false,
+              push: false,
+            },
+          },
         })
 
         // Test that a comment is posted
@@ -212,7 +235,6 @@ describe('gitpoap-bot', () => {
       await probot.receive({ name: 'issue_comment', payload: nonOwnerPayload });
 
       expect(githubAPIMock.activeMocks()).toStrictEqual([
-        'POST https://api.github.com:443/app/installations/29153052/access_tokens',
         'GET https://api.github.com:443/users/test1',
         'GET https://api.github.com:443/users/test2',
         'GET https://api.github.com:443/users/test3',
@@ -248,6 +270,16 @@ describe('gitpoap-bot', () => {
           id: 3,
         })
 
+        // get permissions
+        .get('/repos/gitpoap/gitpoap-bot-test-repo/collaborators/gitpoap/permission')
+        .reply(200, {
+          user: {
+            permissions: {
+              admin: true,
+            },
+          },
+        })
+
         // Test that a comment is posted
         .post('/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments')
         .reply(200);
@@ -269,8 +301,8 @@ describe('gitpoap-bot', () => {
     });
   });
 
-  describe('PR Close', async function () {
-    it('should create a comment on the PR if PR is closed with merge', async (done) => {
+  describe('PR Close', () => {
+    it('should create a comment on the PR if PR is closed with merge', async () => {
       const githubAPIMock = nock('https://api.github.com')
         // Test that we correctly return a test token
         .post('/app/installations/29153052/access_tokens')
@@ -281,11 +313,8 @@ describe('gitpoap-bot', () => {
           },
         })
 
-        // Test that a comment is posted
-        .post('/repos/Codertocat/Hello-World/issues/2/comments', (body: any) => {
-          done(expect(body).toMatchObject(prClosedIssueCommentBody));
-          return true;
-        })
+        // Test that a comment is posted with the correct body
+        .post('/repos/Codertocat/Hello-World/issues/2/comments', prClosedIssueCommentBody)
         .reply(200);
 
       // Test response from gitpoap api
@@ -374,12 +403,3 @@ describe('gitpoap-bot', () => {
     nock.enableNetConnect();
   });
 });
-
-// For more information about testing with Jest see:
-// https://facebook.github.io/jest/
-
-// For more information about using TypeScript in your tests, Jest recommends:
-// https://github.com/kulshekhar/ts-jest
-
-// For more information about testing with Nock see:
-// https://github.com/nock/nock
