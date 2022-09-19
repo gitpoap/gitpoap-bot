@@ -39,7 +39,7 @@
     "vercel": "^28.2.5"
   },
   "engines": {
-    "node": ">= 10.13.0"
+    "node": ">= 16.14.2"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx, json}": [
