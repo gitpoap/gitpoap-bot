@@ -58,7 +58,11 @@ export default (app: Probot) => {
     });
 
     if (res.status !== 200) {
-      context.log.error(`An issue occurred (response code: ${res.status}): ${await res.text()}`);
+      context.log.error(
+        `An issue occurred when attempting to create new claims - (response code: ${
+          res.status
+        }): ${await res.text()}`,
+      );
       return;
     }
 
@@ -104,7 +108,7 @@ export default (app: Probot) => {
       context.log.info(`Sender doesn't have admin, maintain or push permission`);
       return;
     }
-    // check if comment taggged gitpoap-bot
+    // check if comment tagged gitpoap-bot
     if (!comment.includes('@gitpoap-bot')) {
       context.log.info(`Sender didn't tag @gitpoap-bot in this comment`);
       return;
@@ -168,7 +172,11 @@ export default (app: Probot) => {
     });
 
     if (res.status !== 200) {
-      context.log.error(`An issue occurred (response code: ${res.status}): ${await res.text()}`);
+      context.log.error(
+        `An issue occurred when attempting to create new claims (response code: ${
+          res.status
+        }): ${await res.text()}`,
+      );
       return;
     }
 
