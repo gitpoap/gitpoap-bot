@@ -20,7 +20,7 @@ const privateKey = fs.readFileSync(path.join(__dirname, 'fixtures/mock-cert.pem'
 const newClaims = [
   {
     id: 1,
-    user: { githubHandle: 'test' },
+    user: { githubHandle: 'test1' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -31,7 +31,7 @@ const newClaims = [
   },
   {
     id: 2,
-    user: { githubHandle: 'test' },
+    user: { githubHandle: 'test2' },
     gitPOAP: {
       id: 16,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -42,7 +42,7 @@ const newClaims = [
   },
   {
     id: 3,
-    user: { githubHandle: 'test' },
+    user: { githubHandle: 'test3' },
     gitPOAP: {
       id: 17,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
