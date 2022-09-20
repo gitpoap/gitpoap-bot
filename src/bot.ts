@@ -1,7 +1,7 @@
 import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
 import * as Sentry from '@sentry/node';
-import { generateComment, generateIssueComment } from './utils';
+import { generateComment, generateIssueComment, parseComment } from './utils';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -118,12 +118,7 @@ export default (app: Probot) => {
     }
 
     // Parse all tagged contributors
-    // const tagBody = comment.split('@gitpoap-bot ')[1];
-    const contributors =
-      comment
-        ?.match(/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i)
-        ?.map((contributor) => contributor.replace('@', ''))
-        .filter((contributor) => contributor) ?? [];
+    const contributors = parseComment(comment);
     const uniqueContributors = Array.from(new Set(contributors));
 
     console.log('uniqueContributors', uniqueContributors);

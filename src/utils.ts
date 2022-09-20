@@ -77,11 +77,11 @@ export function generateIssueComment(claims: BotClaimData[]): string {
   return comment;
 }
 
-export const parseCommentBody = (comment: string): string[] => {
+export const parseComment = (comment: string): string[] => {
   const contributors =
     comment
-      ?.match(/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i)
+      ?.match(/\B@([a-z0-9](?:-(?=[a-z0-9])|[a-z0-9]){0,38}(?<=[a-z0-9]))/gi)
       ?.map((contributor) => contributor.replace('@', ''))
-      .filter((contributor) => contributor) ?? [];
+      .filter((contributor) => contributor && contributor !== 'gitpoap-bot') ?? [];
   return contributors;
 };

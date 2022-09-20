@@ -1,4 +1,4 @@
-import { generateIssueComment } from '../src/utils';
+import { generateIssueComment, parseComment } from '../src/utils';
 import { getOccurrence } from './utils';
 import { newClaims, claimsWith3GitPoaps, claimsWith1GitPoap } from './fixtures/claims';
 
@@ -47,5 +47,24 @@ describe('Comments', () => {
       // it should contain `@test4` for 1 time since he has only 1 claim
       expect(getOccurrence(comment, '@test4')).toEqual(1);
     });
+  });
+});
+
+describe('Parse Comment', () => {
+  it('should parse hype in username', () => {
+    const comment = '@gitpoap-bot @test-test';
+    const contributors = parseComment('@gitpoap-bot @test-test');
+
+    expect(contributors).toEqual(['test-test']);
+  });
+
+  it('should parse special characters in username', () => {
+    const contributors = parseComment('@gitpoap-bot; @test##test');
+    expect(contributors).toEqual(['test']);
+  });
+
+  it('should parse special characters in username', () => {
+    const contributors = parseComment('@gitpoap-bot; @test##test');
+    expect(contributors).toEqual(['test']);
   });
 });
