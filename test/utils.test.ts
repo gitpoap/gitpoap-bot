@@ -1,4 +1,4 @@
-import { generateIssueComment } from '../src/comments';
+import { generateIssueComment } from '../src/utils';
 import { getOccurrence } from './utils';
 import { newClaims, claimsWith3GitPoaps, claimsWith1GitPoap } from './fixtures/claims';
 

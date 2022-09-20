@@ -1,7 +1,7 @@
 import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
 import * as Sentry from '@sentry/node';
-import { generateComment, generateIssueComment } from './comments';
+import { generateComment, generateIssueComment } from './utils';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -98,8 +98,8 @@ export default (app: Probot) => {
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
 
     // Check if comment tagged gitpoap-bot
-    if (!comment.includes('@gitpoap-bot')) {
-      context.log.info(`Sender didn't tag @gitpoap-bot in this comment`);
+    if (!comment.includes('@gitpoap-bot ')) {
+      context.log.info(`Sender didn't tag @gitpoap-bot explicitly in this comment`);
       return;
     }
 
@@ -118,13 +118,15 @@ export default (app: Probot) => {
     }
 
     // Parse all tagged contributors
-    const tagBody = comment.split('@gitpoap-bot ')[1];
+    // const tagBody = comment.split('@gitpoap-bot ')[1];
     const contributors =
-      tagBody
-        ?.match(/@\w*/g)
+      comment
+        ?.match(/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i)
         ?.map((contributor) => contributor.replace('@', ''))
         .filter((contributor) => contributor) ?? [];
     const uniqueContributors = Array.from(new Set(contributors));
+
+    console.log('uniqueContributors', uniqueContributors);
     // fetch github ids
     const contributorGithubIds: number[] = [];
 

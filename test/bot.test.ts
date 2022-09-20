@@ -10,7 +10,7 @@ import prCommentPayload from './fixtures/issue_comment.created_pr.json';
 import nonOwnerPayload from './fixtures/issue_comment.created_non_owner.json';
 import prClosedPayload from './fixtures/pull_request.closed.json';
 import nonMergedPrClosedPayload from './fixtures/pull_request.closed_non_merged.json';
-import { generateIssueComment, generateComment } from '../src/comments';
+import { generateIssueComment, generateComment } from '../src/utils';
 import { newClaims } from './fixtures/claims';
 
 const privateKey = fs.readFileSync(path.join(__dirname, 'fixtures/mock-cert.pem'), 'utf-8');
