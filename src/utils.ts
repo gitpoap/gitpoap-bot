@@ -76,3 +76,12 @@ export function generateIssueComment(claims: BotClaimData[]): string {
 
   return comment;
 }
+
+export const parseCommentBody = (comment: string): string[] => {
+  const contributors =
+    comment
+      ?.match(/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i)
+      ?.map((contributor) => contributor.replace('@', ''))
+      .filter((contributor) => contributor) ?? [];
+  return contributors;
+};
