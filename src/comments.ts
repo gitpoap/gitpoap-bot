@@ -45,22 +45,24 @@ export function generateComment(claims: BotClaimData[]): string {
 }
 
 export function generateIssueComment(claims: BotClaimData[]): string {
-  let claimData: GitPOAPWithRecipientsMap = {};
+  let gitPOAPsMap: GitPOAPWithRecipientsMap = {};
   let comment = '';
   // arrange claims by its id
   for (let claim of claims) {
-    const recievers = claimData[claim.gitPOAP.id] ? claimData[claim.gitPOAP.id].recipients : [];
-    claimData[claim.gitPOAP.id] = {
+    const recipients = gitPOAPsMap[claim.gitPOAP.id]
+      ? gitPOAPsMap[claim.gitPOAP.id].recipients
+      : [];
+    gitPOAPsMap[claim.gitPOAP.id] = {
       ...claim.gitPOAP,
-      recipients: [...recievers, claim.user.githubHandle],
+      recipients: [...recipients, claim.user.githubHandle],
     };
   }
   // generate a comment body
-  for (const gitPoapId in claimData) {
-    const claim = claimData[gitPoapId];
+  for (const gitPoapId in gitPOAPsMap) {
+    const claim = gitPOAPsMap[gitPoapId];
     const recipients = claim.recipients;
-    const uniquerecipients = Array.from(new Set(recipients));
-    const recipientsTag = uniquerecipients.reduce((acc, recipient) => acc + `@${recipient} `, '');
+    const uniqueRecipients = Array.from(new Set(recipients));
+    const recipientsTag = uniqueRecipients.reduce((acc, recipient) => acc + `@${recipient} `, '');
     comment += `Congrats, ${recipientsTag}! You've earned a GitPOAP below for your contribution!`;
 
     if (claim.id && claim.name && claim.imageUrl) {
