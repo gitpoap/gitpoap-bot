@@ -1,5 +1,7 @@
 import { Probot, ProbotOctokit } from 'probot';
 import nock from 'nock';
+const fs = require('fs');
+const path = require('path');
 // Requiring our app implementation
 import myProbotApp from '../src/bot';
 // Requiring our fixtures
@@ -9,52 +11,9 @@ import nonOwnerPayload from './fixtures/issue_comment.created_non_owner.json';
 import prClosedPayload from './fixtures/pull_request.closed.json';
 import nonMergedPrClosedPayload from './fixtures/pull_request.closed_non_merged.json';
 import { generateIssueComment, generateComment } from '../src/comments';
-const fs = require('fs');
-const path = require('path');
+import { newClaims } from './fixtures/claims';
 
 const privateKey = fs.readFileSync(path.join(__dirname, 'fixtures/mock-cert.pem'), 'utf-8');
-
-const newClaims = [
-  {
-    id: 1,
-    user: { githubHandle: 'test1' },
-    gitPOAP: {
-      id: 15,
-      name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-      imageUrl:
-        'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-      description:
-        'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-      threshold: 1,
-    },
-  },
-  {
-    id: 2,
-    user: { githubHandle: 'test2' },
-    gitPOAP: {
-      id: 16,
-      name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-      imageUrl:
-        'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-      description:
-        'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-      threshold: 1,
-    },
-  },
-  {
-    id: 3,
-    user: { githubHandle: 'test3' },
-    gitPOAP: {
-      id: 17,
-      name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
-      imageUrl:
-        'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
-      description:
-        'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
-      threshold: 1,
-    },
-  },
-];
 const issueCreatedBody = { body: generateIssueComment(newClaims) };
 const prClosedIssueCommentBody = { body: generateComment(newClaims) };
 
