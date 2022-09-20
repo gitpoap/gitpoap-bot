@@ -9,6 +9,9 @@ Sentry.init({
   /* Do not send errors to sentry if app is in development mode */
   enabled: process.env.NODE_ENV !== 'development',
   tracesSampleRate: 1.0,
+  attachStacktrace: true,
+  maxBreadcrumbs: 10,
+  maxValueLength: 500,
 });
 
 export default (app: Probot) => {
