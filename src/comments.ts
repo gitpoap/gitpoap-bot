@@ -59,16 +59,16 @@ export function generateIssueComment(claims: BotClaimData[]): string {
   }
   // generate a comment body
   for (const gitPoapId in gitPOAPsMap) {
-    const claim = gitPOAPsMap[gitPoapId];
-    const recipients = claim.recipients;
+    const gitPOAP = gitPOAPsMap[gitPoapId];
+    const recipients = gitPOAP.recipients;
     const uniqueRecipients = Array.from(new Set(recipients));
     const recipientsTag = uniqueRecipients.reduce((acc, recipient) => acc + `@${recipient} `, '');
     comment += `Congrats, ${recipientsTag}! You've earned a GitPOAP below for your contribution!`;
 
-    if (claim.id && claim.name && claim.imageUrl) {
+    if (gitPOAP.id && gitPOAP.name && gitPOAP.imageUrl) {
       comment += `
-[**${claim.name}**](https://www.gitpoap.io/gp/${claim.id}):
-<img alt="${claim.name} GitPOAP Badge" src="${claim.imageUrl}" height="200px">\n\n`;
+[**${gitPOAP.name}**](https://www.gitpoap.io/gp/${gitPOAP.id}):
+<img alt="${gitPOAP.name} GitPOAP Badge" src="${gitPOAP.imageUrl}" height="200px">\n\n`;
     }
   }
   comment +=
