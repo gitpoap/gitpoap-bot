@@ -60,7 +60,7 @@ export function generateIssueComment(claims: BotClaimData[]): string {
     const claim = claimData[gitPoapId];
     const recipients = claim.recipients;
     const uniquerecipients = Array.from(new Set(recipients));
-    const recipientsTag = uniquerecipients.reduce((acc, receiver) => acc + `@${receiver} `, '');
+    const recipientsTag = uniquerecipients.reduce((acc, recipient) => acc + `@${recipient} `, '');
     comment += `Congrats, ${recipientsTag}! You've earned a GitPOAP below for your contribution!`;
 
     if (claim.id && claim.name && claim.imageUrl) {
