@@ -14,11 +14,11 @@ type BotClaimData = {
   user: { githubHandle: string };
 };
 
-type ArrangedClaim = GitPOAP & {
+type GitPOAPWithRecipients = GitPOAP & {
   recipients: string[];
 };
 
-type ArrangeClaimData = Record<number, ArrangedClaim>;
+type GitPOAPWithRecipientsMap = Record<number, GitPOAPWithRecipients>;
 
 export function generateComment(claims: BotClaimData[]): string {
   let qualifier: string;
@@ -45,7 +45,7 @@ export function generateComment(claims: BotClaimData[]): string {
 }
 
 export function generateIssueComment(claims: BotClaimData[]): string {
-  let claimData: ArrangeClaimData = {};
+  let claimData: GitPOAPWithRecipientsMap = {};
   let comment = '';
   // arrange claims by its id
   for (let claim of claims) {
