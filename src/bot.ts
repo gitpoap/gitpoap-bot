@@ -95,7 +95,6 @@ export default (app: Probot) => {
     const issueNumber = context.payload.issue.number;
     const issueCreatorId = context.payload.issue.user.id;
     const htmlURL = context.payload.issue.html_url;
-
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
 
     // Check if comment tagged gitpoap-bot
