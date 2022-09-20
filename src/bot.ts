@@ -96,24 +96,27 @@ export default (app: Probot) => {
 
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
 
-    // get permissions
+    // Check if comment tagged gitpoap-bot
+    if (!comment.includes('@gitpoap-bot')) {
+      context.log.info(`Sender didn't tag @gitpoap-bot in this comment`);
+      return;
+    }
+
+    // Fetch permission to check if commenter has appropriate permissions to use @gitpoap-bot
     const permissionRes = await context.octokit.rest.repos.getCollaboratorPermissionLevel({
       owner,
       repo,
       username: sender,
     });
     const permissions = permissionRes.data.user?.permissions;
-    // check if user has admin, maintain or push permission
+
+    // Check if commenter has admin, maintain or push permissions
     if (!permissions || (!permissions.admin && !permissions.push && !permissions.maintain)) {
       context.log.info(`Sender doesn't have admin, maintain or push permission`);
       return;
     }
-    // check if comment tagged gitpoap-bot
-    if (!comment.includes('@gitpoap-bot')) {
-      context.log.info(`Sender didn't tag @gitpoap-bot in this comment`);
-      return;
-    }
-    // parse followed tagged contributors
+
+    // Parse all tagged contributors
     const tagBody = comment.split('@gitpoap-bot ')[1];
     const contributors =
       tagBody
@@ -123,6 +126,7 @@ export default (app: Probot) => {
     const uniqueContributors = Array.from(new Set(contributors));
     // fetch github ids
     const contributorGithubIds: number[] = [];
+
     for (let contributor of uniqueContributors) {
       const res = await context.octokit.users.getByUsername({
         username: contributor,
@@ -133,11 +137,13 @@ export default (app: Probot) => {
         contributorGithubIds.push(user?.id);
       }
     }
-    // if there are no contributors tagged, we award GitPOAP(s) to the PR/issue creator
+
+    // If there are no contributors tagged, we award GitPOAP(s) to the PR/issue creator
     if (contributorGithubIds.length === 0) {
       contributorGithubIds.push(issueCreatorId);
     }
-    // create claims for these contributors via API endpoint
+
+    // Create claims for these contributors via API endpoint
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
 
@@ -180,7 +186,7 @@ export default (app: Probot) => {
       return;
     }
 
-    // create a comment to show info about gitpoap
+    // Create a comment to show info about gitpoap
     const response = await res.json();
 
     if (response.newClaims.length === 0) {
