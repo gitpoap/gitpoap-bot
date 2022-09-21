@@ -77,6 +77,26 @@ export function generateIssueComment(claims: BotClaimData[]): string {
   return comment;
 }
 
+// must be a valid mention of any tags (`@gitpoap-bot` or any username).
+// need whitespace or punctuation surrounding, or at least at the end if it's the first thing in the text
+export const hasGitPoapBotTagged = (comment: string): boolean => {
+  // found gitpoap-bot with spaces and quotes
+  if (
+    comment.includes(' @gitpoap-bot ') ||
+    comment.includes('"@gitpoap-bot"') ||
+    comment.includes("'@gitpoap-bot'")
+  )
+    return true;
+  // found gitpoap-bot at the beginning with space
+  if (comment.includes('@gitpoap-bot ') && comment.indexOf('@gitpoap-bot') === 0) return true;
+  // found gitpoap-bot at the end with space
+  if (comment.includes(' @gitpoap-bot') && comment.slice(-13) === ' @gitpoap-bot') return true;
+
+  return false;
+};
+
+// names don't have to come come after `@gitpoap-bot`
+// should parse hyphen / special character
 export const parseComment = (comment: string): string[] => {
   const contributors =
     comment

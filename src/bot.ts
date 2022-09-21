@@ -1,7 +1,7 @@
 import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
 import * as Sentry from '@sentry/node';
-import { generateComment, generateIssueComment, parseComment } from './utils';
+import { generateComment, generateIssueComment, parseComment, hasGitPoapBotTagged } from './utils';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -93,12 +93,11 @@ export default (app: Probot) => {
     const sender = context.payload.sender.login;
     const comment = context.payload.comment.body;
     const issueNumber = context.payload.issue.number;
-    const issueCreatorId = context.payload.issue.user.id;
     const htmlURL = context.payload.issue.html_url;
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
 
     // Check if comment tagged gitpoap-bot
-    if (!comment.includes('@gitpoap-bot ')) {
+    if (!hasGitPoapBotTagged(comment)) {
       context.log.info(`Sender didn't tag @gitpoap-bot explicitly in this comment`);
       return;
     }
@@ -120,8 +119,11 @@ export default (app: Probot) => {
     // Parse all tagged contributors
     const contributors = parseComment(comment);
     const uniqueContributors = Array.from(new Set(contributors));
-
-    console.log('uniqueContributors', uniqueContributors);
+    // check if there are tagged users
+    if (uniqueContributors.length === 0) {
+      context.log.info(`Sender did't tag any users`);
+      return;
+    }
     // fetch github ids
     const contributorGithubIds: number[] = [];
 
@@ -135,12 +137,6 @@ export default (app: Probot) => {
         contributorGithubIds.push(user?.id);
       }
     }
-
-    // If there are no contributors tagged, we award GitPOAP(s) to the PR/issue creator
-    if (contributorGithubIds.length === 0) {
-      contributorGithubIds.push(issueCreatorId);
-    }
-
     // Create claims for these contributors via API endpoint
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
