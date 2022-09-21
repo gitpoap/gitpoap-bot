@@ -27,3 +27,13 @@ export const newClaimsWithoutOrgs_requestBody = {
     wasEarnedByMention: true,
   },
 };
+
+export const newClaimsForValidUsers_requestBody = {
+  issue: {
+    organization: 'gitpoap',
+    repo: 'gitpoap-bot-test-repo',
+    issueNumber: 25,
+    contributorGithubIds: [75544],
+    wasEarnedByMention: true,
+  },
+};
