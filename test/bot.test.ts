@@ -231,7 +231,7 @@ describe('gitpoap-bot', () => {
 
         // get github login ids
         .get('/users/test-test-')
-        .reply(200, {
+        .reply(404, {
           message: 'Not Found',
           documentation_url: 'https://docs.github.com/rest/reference/users#get-a-user',
         })
@@ -241,7 +241,7 @@ describe('gitpoap-bot', () => {
           type: 'User',
         })
         .get('/users/test1-test-test')
-        .reply(200, {
+        .reply(404, {
           message: 'Not Found',
           documentation_url: 'https://docs.github.com/rest/reference/users#get-a-user',
         })
