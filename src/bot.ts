@@ -1,7 +1,7 @@
 import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
 import * as Sentry from '@sentry/node';
-import { generateComment, generateIssueComment, parseComment, hasGitPoapBotTagged } from './utils';
+import { generateComment, generateIssueComment, parseComment, CommentParseResult } from './utils';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -96,8 +96,10 @@ export default (app: Probot) => {
     const htmlURL = context.payload.issue.html_url;
     const isPR = htmlURL?.includes(`/pull/${issueNumber}`);
 
+    // parse comment
+    const parseResult: CommentParseResult = await parseComment(comment, context);
     // Check if comment tagged gitpoap-bot
-    if (!hasGitPoapBotTagged(comment)) {
+    if (!parseResult.isBotMentioned) {
       context.log.info(`Sender didn't tag @gitpoap-bot explicitly in this comment`);
       return;
     }
@@ -116,25 +118,11 @@ export default (app: Probot) => {
       return;
     }
 
-    // Parse all tagged contributors
-    const contributors = parseComment(comment);
-    // check if there are tagged users
-    if (contributors.length === 0) {
-      context.log.info(`Sender did't tag any users`);
+    // check if there are valid tagged users
+    const contributorGithubIds = parseResult.contributorIds;
+    if (contributorGithubIds.length === 0) {
+      context.log.info(`Sender didn't tag any users`);
       return;
-    }
-    // fetch github ids
-    const contributorGithubIds: number[] = [];
-
-    for (let contributor of contributors) {
-      const res = await context.octokit.users.getByUsername({
-        username: contributor,
-      });
-      const user = res.data;
-      // we give GitPOAPs to only users, not orgnizations
-      if (user && user.id && user.type === 'User') {
-        contributorGithubIds.push(user?.id);
-      }
     }
     // Create claims for these contributors via API endpoint
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
