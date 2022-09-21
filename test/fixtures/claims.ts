@@ -191,3 +191,19 @@ export const claimsWith1GitPoap = [
     },
   },
 ];
+
+export const newClaimsWithoutOrgs = [
+  {
+    id: 2,
+    user: { githubHandle: 'test2' },
+    gitPOAP: {
+      id: 16,
+      name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
+      imageUrl:
+        'https://assets.poap.xyz/2022-wagyu-installer-contributor-2022-logo-1649213116205.png',
+      description:
+        'You contributed at least one merged pull request to the Wagyu Installer project in 2022.  Your contributions are greatly valued.',
+      threshold: 1,
+    },
+  },
+];
