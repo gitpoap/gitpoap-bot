@@ -1,4 +1,4 @@
-import { generateIssueComment, parseComment } from '../src/utils';
+import { generateIssueComment, parseComment, hasGitPoapBotTagged } from '../src/utils';
 import { getOccurrence } from './utils';
 import { newClaims, claimsWith3GitPoaps, claimsWith1GitPoap } from './fixtures/claims';
 
@@ -51,20 +51,58 @@ describe('Comments', () => {
 });
 
 describe('Parse Comment', () => {
-  it('should parse hype in username', () => {
-    const comment = '@gitpoap-bot @test-test';
+  it('should parse hype and special characters in username', () => {
     const contributors = parseComment('@gitpoap-bot @test-test');
-
     expect(contributors).toEqual(['test-test']);
   });
 
   it('should parse special characters in username', () => {
-    const contributors = parseComment('@gitpoap-bot; @test##test');
-    expect(contributors).toEqual(['test']);
+    const contributors = parseComment('@gitpoap-bot; @test##test @test2_@test1');
+    expect(contributors).toEqual(['test', 'test2']);
   });
 
-  it('should parse special characters in username', () => {
-    const contributors = parseComment('@gitpoap-bot; @test##test');
-    expect(contributors).toEqual(['test']);
+  it('should parse all usernames in the comments', () => {
+    const contributors = parseComment('@test @test-test @gitpoap-bot; @test1');
+    expect(contributors).toEqual(['test', 'test-test', 'test1']);
+  });
+});
+
+describe('Check gitpoap-bot in the comment', () => {
+  it('should recognize @gitpoap bot tagged at the beginning', () => {
+    expect(hasGitPoapBotTagged('@gitpoap-bot @test-test')).toEqual(true);
+    expect(hasGitPoapBotTagged('@gitpoap-bot    @test-test')).toEqual(true);
+    expect(hasGitPoapBotTagged('"@gitpoap-bot"    @test-test')).toEqual(true);
+    expect(hasGitPoapBotTagged("'@gitpoap-bot'@test-test")).toEqual(true);
+    expect(hasGitPoapBotTagged("'@gitpoap-bot'    @test-test")).toEqual(true);
+    expect(hasGitPoapBotTagged('"@gitpoap-bot"t @test-test')).toEqual(true);
+    expect(hasGitPoapBotTagged('@gitpoap-bot @test-test@gitpoap-bot')).toEqual(true);
+
+    expect(hasGitPoapBotTagged('@gitpoap-bot@test-test')).toEqual(false);
+    expect(hasGitPoapBotTagged('@gitpoap-bot@test-test')).toEqual(false);
+    expect(hasGitPoapBotTagged('@gitpoap-bott @test-test')).toEqual(false);
+  });
+
+  it('should recognize @gitpoap bot tagged in the middle', () => {
+    expect(hasGitPoapBotTagged('congrats @gitpoap-bot @test-test')).toEqual(true);
+    expect(hasGitPoapBotTagged('For good contributes, @gitpoap-bot    @test-test')).toEqual(true);
+    expect(hasGitPoapBotTagged('Hey   "@gitpoap-bot"@test-test')).toEqual(true);
+    expect(hasGitPoapBotTagged('Hey   @"@gitpoap-bot"@test-test')).toEqual(true);
+
+    expect(hasGitPoapBotTagged('Hey   @gitpoap-bot@test-test')).toEqual(false);
+    expect(hasGitPoapBotTagged('Hey   @gitpoap-bbot @test-test')).toEqual(false);
+    expect(hasGitPoapBotTagged('Hey   "@gitpoap-bot@test-test')).toEqual(false);
+    expect(hasGitPoapBotTagged("Hey   @gitpoap-bot'@test-test")).toEqual(false);
+  });
+
+  it('should recognize @gitpoap bot tagged at the end', () => {
+    expect(hasGitPoapBotTagged('congrats @test-test @gitpoap-bot')).toEqual(true);
+    expect(hasGitPoapBotTagged('For good contributes, @test-test"@gitpoap-bot"')).toEqual(true);
+    expect(hasGitPoapBotTagged("Hey   @test-test@'@gitpoap-bot'")).toEqual(true);
+    expect(hasGitPoapBotTagged('Hey   @test-test@gitpoap-bot @gitpoap-bot')).toEqual(true);
+
+    expect(hasGitPoapBotTagged('Hey   @test-test@gitpoap-bot')).toEqual(false);
+    expect(hasGitPoapBotTagged('Hey   @test "@gitpoap-bot')).toEqual(false);
+    expect(hasGitPoapBotTagged('Hey   @test@gitpoap-bot"')).toEqual(false);
+    expect(hasGitPoapBotTagged("Hey   @testt@gitpoap-bot'")).toEqual(false);
   });
 });

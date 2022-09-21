@@ -89,7 +89,7 @@
     "created_at": "2022-09-18T12: 38: 01Z",
     "updated_at": "2022-09-18T12: 38: 01Z",
     "author_association": "CONTRIBUTOR",
-    "body": "@test1 @test2 @test3 good, @gitpoap-bot",
+    "body": "@gitpoap-bot",
     "reactions": {
       "url": "https: //api.github.com/repos/gitpoap/gitpoap-bot-test-repo/issues/comments/1250261829/reactions",
       "total_count": 0,

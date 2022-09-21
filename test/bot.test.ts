@@ -6,6 +6,7 @@ const path = require('path');
 import myProbotApp from '../src/bot';
 // Requiring our fixtures
 import issueCommentPayload from './fixtures/issue_comment.created_issue.json';
+import issueCommentNoUsersPayload from './fixtures/issue_comment.created_issue_no_user.json';
 import prCommentPayload from './fixtures/issue_comment.created_pr.json';
 import nonOwnerPayload from './fixtures/issue_comment.created_non_owner.json';
 import prClosedPayload from './fixtures/pull_request.closed.json';
@@ -257,6 +258,35 @@ describe('gitpoap-bot', () => {
         'POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments',
       ]);
       expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+    });
+
+    it('should create a comment on the issue if repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        });
+
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims,
+        });
+
+      // Receive a webhook event
+      await probot.receive({ name: 'issue_comment', payload: issueCommentNoUsersPayload });
+
+      expect(githubAPIMock.activeMocks()).toStrictEqual([
+        'POST https://api.github.com:443/app/installations/29153052/access_tokens',
+      ]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([
+        `POST ${process.env.API_URL}/claims/gitpoap-bot/create`,
+      ]);
     });
   });
 
