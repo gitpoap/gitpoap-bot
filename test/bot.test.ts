@@ -208,9 +208,6 @@ describe('gitpoap-bot', () => {
       await probot.receive({ name: 'issue_comment', payload: nonOwnerPayload });
 
       expect(githubAPIMock.activeMocks()).toStrictEqual([
-        'GET https://api.github.com:443/users/test1',
-        'GET https://api.github.com:443/users/test2',
-        'GET https://api.github.com:443/users/test3',
         'POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments',
       ]);
       expect(gitpoapAPIMock.activeMocks()).toStrictEqual([
@@ -285,6 +282,16 @@ describe('gitpoap-bot', () => {
           permissions: {
             issues: 'write',
           },
+        })
+
+        // get permissions
+        .get('/repos/gitpoap/gitpoap-bot-test-repo/collaborators/gitpoap/permission')
+        .reply(200, {
+          user: {
+            permissions: {
+              admin: true,
+            },
+          },
         });
 
       // Test response from gitpoap api
@@ -297,9 +304,7 @@ describe('gitpoap-bot', () => {
       // Receive a webhook event
       await probot.receive({ name: 'issue_comment', payload: issueCommentNoUsersPayload });
 
-      expect(githubAPIMock.activeMocks()).toStrictEqual([
-        'POST https://api.github.com:443/app/installations/29153052/access_tokens',
-      ]);
+      expect(githubAPIMock.activeMocks()).toStrictEqual([]);
       expect(gitpoapAPIMock.activeMocks()).toStrictEqual([
         `POST ${process.env.API_URL}/claims/gitpoap-bot/create`,
       ]);

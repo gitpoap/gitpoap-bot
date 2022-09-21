@@ -1,5 +1,7 @@
-// Should be the same as in gitpoap-backend/src/routes/claims.ts
+import { Context } from 'probot';
+import issueParser, { Mention } from 'issue-parser';
 
+// Should be the same as in gitpoap-backend/src/routes/claims.ts
 type GitPOAP = {
   id: number;
   name: string;
@@ -19,6 +21,16 @@ type GitPOAPWithRecipients = GitPOAP & {
 };
 
 type GitPOAPWithRecipientsMap = Record<number, GitPOAPWithRecipients>;
+
+export type CommentParseResult = {
+  mentions: ReadonlyArray<Mention>;
+  userMentions: string[];
+  invalidUserMentions: string[];
+  organizations: string[];
+  validUserMentions: string[];
+  contributorIds: number[];
+  isBotMentioned: boolean;
+};
 
 export function generateComment(claims: BotClaimData[]): string {
   let qualifier: string;
@@ -77,31 +89,53 @@ export function generateIssueComment(claims: BotClaimData[]): string {
   return comment;
 }
 
-// must be a valid mention of any tags (`@gitpoap-bot` or any username).
-// need whitespace or punctuation surrounding, or at least at the end if it's the first thing in the text
-export const hasGitPoapBotTagged = (comment: string): boolean => {
-  // found gitpoap-bot with spaces and quotes
-  if (
-    comment.includes(' @gitpoap-bot ') ||
-    comment.includes('"@gitpoap-bot"') ||
-    comment.includes("'@gitpoap-bot'")
-  )
-    return true;
-  // found gitpoap-bot at the beginning with space
-  if (comment.includes('@gitpoap-bot ') && comment.indexOf('@gitpoap-bot') === 0) return true;
-  // found gitpoap-bot at the end with space
-  if (comment.includes(' @gitpoap-bot') && comment.slice(-13) === ' @gitpoap-bot') return true;
+export const parseComment = async (
+  comment: string,
+  context: Context<'issue_comment.created'>,
+): Promise<CommentParseResult> => {
+  // parse comment using `issue-parser`
+  const parse = issueParser('github');
+  const parseResult = parse(comment);
+  const mentions: ReadonlyArray<Mention> = parseResult.mentions;
+  const usernames: string[] = mentions.map((mention: Mention) => mention.user);
+  // check if gitpoap-bot is mentioned
+  const isBotMentioned = usernames.some((username: string) => username === 'gitpoap-bot');
+  // filter user mentions
+  const userMentions: string[] = usernames.filter((username) => username !== 'gitpoap-bot');
+  // filter valid user mentions, not organization
+  const validUserMentions: string[] = [];
+  const contributorIds: number[] = [];
+  const invalidUserMentions: string[] = [];
+  const organizations: string[] = [];
+  for (let username of userMentions) {
+    try {
+      const res = await context.octokit.users.getByUsername({
+        username,
+      });
+      const user = res.data;
+      // we give GitPOAPs to only users, not orgnizations
+      if (user && user.id) {
+        if (user.type === 'User') {
+          validUserMentions.push(username);
+          contributorIds.push(user?.id);
+        } else if (user.type === 'Organization') {
+          organizations.push(username);
+        }
+      } else {
+        invalidUserMentions.push(username);
+      }
+    } catch (err) {
+      console.log('err', err);
+    }
+  }
 
-  return false;
-};
-
-// names don't have to come come after `@gitpoap-bot`
-// should parse hyphen / special character
-export const parseComment = (comment: string): string[] => {
-  const contributors =
-    comment
-      ?.match(/\B@([a-z0-9](?:-(?=[a-z0-9])|[a-z0-9]){0,38}(?<=[a-z0-9]))/gi)
-      ?.map((contributor) => contributor.replace('@', ''))
-      .filter((contributor) => contributor && contributor !== 'gitpoap-bot') ?? [];
-  return Array.from(new Set(contributors));
+  return {
+    mentions,
+    isBotMentioned,
+    userMentions,
+    validUserMentions,
+    contributorIds,
+    invalidUserMentions,
+    organizations,
+  };
 };
