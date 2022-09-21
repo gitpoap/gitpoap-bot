@@ -12,11 +12,17 @@ import nonOwnerPayload from './fixtures/issue_comment.created_non_owner.json';
 import prClosedPayload from './fixtures/pull_request.closed.json';
 import nonMergedPrClosedPayload from './fixtures/pull_request.closed_non_merged.json';
 import { generateIssueComment, generateComment } from '../src/utils';
-import { newClaims } from './fixtures/claims';
+import { newClaims, newClaimsWithoutOrgs } from './fixtures/claims';
+import {
+  newIssueClaims_requestBody,
+  newPRClaims_requestBody,
+  newClaimsWithoutOrgs_requestBody,
+} from './fixtures/requestBody';
 
 const privateKey = fs.readFileSync(path.join(__dirname, 'fixtures/mock-cert.pem'), 'utf-8');
 const issueCreatedBody = { body: generateIssueComment(newClaims) };
 const prClosedIssueCommentBody = { body: generateComment(newClaims) };
+const issueCreatedBodyWithoutOrgs = { body: generateIssueComment(newClaimsWithoutOrgs) };
 
 describe('gitpoap-bot', () => {
   let probot: any;
@@ -52,14 +58,17 @@ describe('gitpoap-bot', () => {
         .get('/users/test1')
         .reply(200, {
           id: 1,
+          type: 'User',
         })
         .get('/users/test2')
         .reply(200, {
           id: 2,
+          type: 'User',
         })
         .get('/users/test3')
         .reply(200, {
           id: 3,
+          type: 'User',
         })
 
         // get permissions
@@ -78,7 +87,7 @@ describe('gitpoap-bot', () => {
 
       // Test response from gitpoap api
       const gitpoapAPIMock = nock(`${process.env.API_URL}`)
-        .post(`/claims/gitpoap-bot/create`)
+        .post(`/claims/gitpoap-bot/create`, newIssueClaims_requestBody)
         .reply(200, {
           newClaims,
         });
@@ -105,6 +114,7 @@ describe('gitpoap-bot', () => {
         .get('/users/test1')
         .reply(200, {
           id: 1,
+          type: 'User',
         })
         .get('/users/test2')
         .reply(200, {
@@ -113,6 +123,7 @@ describe('gitpoap-bot', () => {
         .get('/users/test3')
         .reply(200, {
           id: 3,
+          type: 'User',
         })
 
         // get permissions
@@ -131,7 +142,7 @@ describe('gitpoap-bot', () => {
 
       // Test response from gitpoap api
       const gitpoapAPIMock = nock(`${process.env.API_URL}`)
-        .post(`/claims/gitpoap-bot/create`)
+        .post(`/claims/gitpoap-bot/create`, newPRClaims_requestBody)
         .reply(200, {
           newClaims,
         });
@@ -158,6 +169,7 @@ describe('gitpoap-bot', () => {
         .get('/users/test1')
         .reply(200, {
           id: 1,
+          type: 'User',
         })
         .get('/users/test2')
         .reply(200, {
@@ -166,6 +178,7 @@ describe('gitpoap-bot', () => {
         .get('/users/test3')
         .reply(200, {
           id: 3,
+          type: 'User',
         })
 
         // get permissions
@@ -220,14 +233,17 @@ describe('gitpoap-bot', () => {
         .get('/users/test1')
         .reply(200, {
           id: 1,
+          type: 'User',
         })
         .get('/users/test2')
         .reply(200, {
           id: 2,
+          type: 'User',
         })
         .get('/users/test3')
         .reply(200, {
           id: 3,
+          type: 'User',
         })
 
         // get permissions
@@ -260,7 +276,7 @@ describe('gitpoap-bot', () => {
       expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
     });
 
-    it('should create a comment on the issue if repo owner tagged gitpoap-bot and contributors on an issue comment', async () => {
+    it('should not create a comment on the issue if repo owner tagged gitpoap-bot with no contributors tagged', async () => {
       const githubAPIMock = nock('https://api.github.com')
         // Test that we correctly return a test token
         .post('/app/installations/29153052/access_tokens')
@@ -287,6 +303,65 @@ describe('gitpoap-bot', () => {
       expect(gitpoapAPIMock.activeMocks()).toStrictEqual([
         `POST ${process.env.API_URL}/claims/gitpoap-bot/create`,
       ]);
+    });
+
+    it('should create claims for only users', async () => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+
+        // get github login ids
+        .get('/users/test1')
+        .reply(200, {
+          id: 1,
+          type: 'Organization',
+        })
+        .get('/users/test2')
+        .reply(200, {
+          id: 2,
+          type: 'User',
+        })
+        .get('/users/test3')
+        .reply(200, {
+          id: 3,
+          type: 'Organization',
+        })
+
+        // get permissions
+        .get('/repos/gitpoap/gitpoap-bot-test-repo/collaborators/gitpoap/permission')
+        .reply(200, {
+          user: {
+            permissions: {
+              admin: true,
+            },
+          },
+        })
+
+        // Test that a comment is posted with the correct body
+        .post(
+          '/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments',
+          issueCreatedBodyWithoutOrgs,
+        )
+        .reply(200);
+
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`, newClaimsWithoutOrgs_requestBody)
+        .reply(200, {
+          newClaims: newClaimsWithoutOrgs,
+        });
+
+      // Receive a webhook event
+      await probot.receive({ name: 'issue_comment', payload: issueCommentPayload });
+
+      expect(githubAPIMock.activeMocks()).toStrictEqual([]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
     });
   });
 

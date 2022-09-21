@@ -132,8 +132,8 @@ export default (app: Probot) => {
         username: contributor,
       });
       const user = res.data;
-
-      if (user && user.id) {
+      // we give GitPOAPs to only users, not orgnizations
+      if (user && user.id && user.type === 'User') {
         contributorGithubIds.push(user?.id);
       }
     }
