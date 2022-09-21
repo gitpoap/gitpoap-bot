@@ -52,18 +52,32 @@ describe('Comments', () => {
 
 describe('Parse Comment', () => {
   it('should parse hype and special characters in username', () => {
-    const contributors = parseComment('@gitpoap-bot @test-test');
-    expect(contributors).toEqual(['test-test']);
+    expect(parseComment('@gitpoap-bot @test-test')).toEqual(['test-test']);
+    expect(parseComment('@gitpoap-bot @test-test-- @-@test1-test-test@test2')).toEqual([
+      'test-test',
+      'test1-test-test',
+    ]);
+    expect(parseComment('@gitpoap-bot @test-test- @test-test-- @-@test1-test-test@test2')).toEqual([
+      'test-test',
+      'test1-test-test',
+    ]);
   });
 
   it('should parse special characters in username', () => {
-    const contributors = parseComment('@gitpoap-bot; @test##test @test2_@test1');
-    expect(contributors).toEqual(['test', 'test2']);
+    expect(parseComment('@gitpoap-bot; @test##test @test2_@test1')).toEqual(['test', 'test2']);
+    expect(
+      parseComment(
+        'Good comments, @gitpoap-bot @test1 and @test2:: @test3 @test4@test5 no contributor',
+      ),
+    ).toEqual(['test1', 'test2', 'test3', 'test4']);
   });
 
   it('should parse all usernames in the comments', () => {
-    const contributors = parseComment('@test @test-test @gitpoap-bot; @test1');
-    expect(contributors).toEqual(['test', 'test-test', 'test1']);
+    expect(parseComment('@test @test-test @gitpoap-bot; @test1')).toEqual([
+      'test',
+      'test-test',
+      'test1',
+    ]);
   });
 });
 

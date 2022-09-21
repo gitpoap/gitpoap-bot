@@ -118,16 +118,15 @@ export default (app: Probot) => {
 
     // Parse all tagged contributors
     const contributors = parseComment(comment);
-    const uniqueContributors = Array.from(new Set(contributors));
     // check if there are tagged users
-    if (uniqueContributors.length === 0) {
+    if (contributors.length === 0) {
       context.log.info(`Sender did't tag any users`);
       return;
     }
     // fetch github ids
     const contributorGithubIds: number[] = [];
 
-    for (let contributor of uniqueContributors) {
+    for (let contributor of contributors) {
       const res = await context.octokit.users.getByUsername({
         username: contributor,
       });
