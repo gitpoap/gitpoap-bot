@@ -41,7 +41,8 @@
     "vercel": "^28.2.5"
   },
   "engines": {
-    "node": ">= 16.14.2"
+    "node": ">= 16.14.2",
+    "yarn": "1.22.*"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx, json}": [
