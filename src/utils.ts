@@ -32,6 +32,13 @@ export type CommentParseResult = {
   isBotMentioned: boolean;
 };
 
+const addLearnMore = (comment: string): string =>
+  comment + `\n\nLearn more about GitPOAPs [here](https://docs.gitpoap.io/).`;
+
+const addHeadOverToGitPOAP = (comment: string): string =>
+  comment +
+  `\n\nHead to [gitpoap.io](https://www.gitpoap.io) & connect your GitHub account to mint!`;
+
 export function generateComment(claims: BotClaimData[]): string {
   let qualifier: string;
   if (claims.length > 1) {
@@ -50,8 +57,8 @@ export function generateComment(claims: BotClaimData[]): string {
     }
   }
 
-  comment +=
-    '\n\nHead on over to [GitPOAP.io](https://www.gitpoap.io) and connect your GitHub account to mint!';
+  comment = addHeadOverToGitPOAP(comment);
+  comment = addLearnMore(comment);
 
   return comment;
 }
@@ -83,8 +90,9 @@ export function generateIssueComment(claims: BotClaimData[]): string {
 <img alt="${gitPOAP.name} GitPOAP Badge" src="${gitPOAP.imageUrl}" height="200px">\n\n`;
     }
   }
-  comment +=
-    '\n\nHead on over to [GitPOAP.io](https://www.gitpoap.io) and connect your GitHub account to mint if you haven’t already!';
+
+  comment = addHeadOverToGitPOAP(comment);
+  comment = addLearnMore(comment);
 
   return comment;
 }
