@@ -33,7 +33,8 @@ export type CommentParseResult = {
 };
 
 const addLearnMore = (comment: string): string =>
-  comment + `\n\nLearn more about GitPOAPs [here](https://docs.gitpoap.io/).`;
+  comment +
+  `\n\nLearn more about GitPOAPs [here](https://medium.com/gitpoap/whats-a-gitpoap-72f1f5778c6/).`;
 
 const addHeadOverToGitPOAP = (comment: string): string =>
   comment +
@@ -83,7 +84,7 @@ export function generateIssueComment(claims: BotClaimData[]): string {
     const recipients = gitPOAP.recipients;
     const uniqueRecipients = Array.from(new Set(recipients));
     const recipientsTag = uniqueRecipients.reduce((acc, recipient) => acc + `@${recipient} `, '');
-    comment += `Congrats, ${recipientsTag}! You've earned a GitPOAP below for your contribution!\n\n`;
+    comment += `Congrats, ${recipientsTag}! You've earned a GitPOAP for your contribution!\n\n`;
 
     if (gitPOAP.id && gitPOAP.name && gitPOAP.imageUrl) {
       comment += `
