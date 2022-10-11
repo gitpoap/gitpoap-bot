@@ -41,6 +41,16 @@ export default (app: Probot) => {
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
 
+    const body = JSON.stringify({
+      pullRequest: {
+        organization,
+        repo,
+        pullRequestNumber: pullRequestNumber,
+        contributorGithubIds: [senderId],
+        wasEarnedByMention: false,
+      },
+    });
+
     const res = await fetch(`${process.env.API_URL}/claims/gitpoap-bot/create`, {
       method: 'POST',
       headers: {
@@ -48,22 +58,15 @@ export default (app: Probot) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwt.token}`,
       },
-      body: JSON.stringify({
-        pullRequest: {
-          organization,
-          repo,
-          pullRequestNumber: pullRequestNumber,
-          contributorGithubIds: [senderId],
-          wasEarnedByMention: false,
-        },
-      }),
+      body,
     });
 
     if (res.status !== 200) {
+      Sentry.setExtra('body', body);
       context.log.error(
         `An issue occurred when attempting to create new claims - (response code: ${
           res.status
-        }): ${await res.text()}`,
+        }): ${await res.text()} - ${body}`,
       );
       return;
     }
@@ -128,25 +131,27 @@ export default (app: Probot) => {
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
 
-    const data = isPR
-      ? {
-          pullRequest: {
-            organization,
-            repo,
-            pullRequestNumber: issueNumber,
-            contributorGithubIds,
-            wasEarnedByMention: true,
+    const body = JSON.stringify(
+      isPR
+        ? {
+            pullRequest: {
+              organization,
+              repo,
+              pullRequestNumber: issueNumber,
+              contributorGithubIds,
+              wasEarnedByMention: true,
+            },
+          }
+        : {
+            issue: {
+              organization,
+              repo,
+              issueNumber,
+              contributorGithubIds,
+              wasEarnedByMention: true,
+            },
           },
-        }
-      : {
-          issue: {
-            organization,
-            repo,
-            issueNumber,
-            contributorGithubIds,
-            wasEarnedByMention: true,
-          },
-        };
+    );
 
     const res = await fetch(`${process.env.API_URL}/claims/gitpoap-bot/create`, {
       method: 'POST',
@@ -155,14 +160,15 @@ export default (app: Probot) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwt.token}`,
       },
-      body: JSON.stringify(data),
+      body,
     });
 
     if (res.status !== 200) {
+      Sentry.setExtra('body', body);
       context.log.error(
         `An issue occurred when attempting to create new claims (response code: ${
           res.status
-        }): ${await res.text()}`,
+        }): ${await res.text()} - ${body}`,
       );
       return;
     }
