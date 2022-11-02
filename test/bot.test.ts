@@ -7,6 +7,7 @@ import myProbotApp from '../src/bot';
 // Requiring our fixtures
 import issueCommentPayload from './fixtures/issue_comment.created_issue.json';
 import issueCommentNoUsersPayload from './fixtures/issue_comment.created_issue_no_user.json';
+import issueCommentNoOrganizationPayload from './fixtures/issue_comment.created_issue_no_organization.json';
 import issueCommentInvalidUsersPayload from './fixtures/issue_comment.created_issue_invalid_users.json';
 import prCommentPayload from './fixtures/issue_comment.created_pr.json';
 import nonOwnerPayload from './fixtures/issue_comment.created_non_owner.json';
@@ -429,6 +430,70 @@ describe('gitpoap-bot', () => {
 
       expect(githubAPIMock.activeMocks()).toStrictEqual([]);
       expect(gitpoapAPIMock.activeMocks()).toStrictEqual([]);
+    });
+
+    it('should not create claims if organization is empty', async () => {
+      const githubAPIMock = nock('https://api.github.com')
+        // Test that we correctly return a test token
+        .post('/app/installations/29153052/access_tokens')
+        .reply(200, {
+          token: 'test',
+          permissions: {
+            issues: 'write',
+          },
+        })
+
+        // get github login ids
+        .get('/users/test1')
+        .reply(200, {
+          id: 1,
+          type: 'Organization',
+        })
+        .get('/users/test2')
+        .reply(200, {
+          id: 2,
+          type: 'User',
+        })
+        .get('/users/test3')
+        .reply(200, {
+          id: 3,
+          type: 'Organization',
+        })
+
+        // get permissions
+        .get('/repos/gitpoap/gitpoap-bot-test-repo/collaborators/gitpoap/permission')
+        .reply(200, {
+          user: {
+            permissions: {
+              admin: true,
+            },
+          },
+        })
+
+        // Test that a comment is posted with the correct body
+        .post(
+          '/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments',
+          issueCreatedBodyWithoutOrgs,
+        )
+        .reply(200);
+
+      // Test response from gitpoap api
+      const gitpoapAPIMock = nock(`${process.env.API_URL}`)
+        .post(`/claims/gitpoap-bot/create`)
+        .reply(200, {
+          newClaims: newClaimsWithoutOrgs,
+        });
+
+      // Receive a webhook event
+      await probot.receive({ name: 'issue_comment', payload: issueCommentNoOrganizationPayload });
+
+      expect(githubAPIMock.activeMocks()).toStrictEqual([
+        'GET https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/collaborators/gitpoap/permission',
+        'POST https://api.github.com:443/repos/gitpoap/gitpoap-bot-test-repo/issues/25/comments',
+      ]);
+      expect(gitpoapAPIMock.activeMocks()).toStrictEqual([
+        `POST ${process.env.API_URL}/claims/gitpoap-bot/create`,
+      ]);
     });
   });
 
