@@ -39,7 +39,7 @@ export default (app: Probot) => {
     }
     // Check if organization is valid
     if (!organization) {
-      context.log.info(`Organization is empty`);
+      context.log.error(`Organization is empty`);
       return;
     }
 
@@ -113,7 +113,7 @@ export default (app: Probot) => {
     }
     // Check if organization is valid
     if (!organization) {
-      context.log.info(`Organization is empty`);
+      context.log.error(`Organization is empty`);
       return;
     }
 
