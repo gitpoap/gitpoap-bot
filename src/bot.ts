@@ -24,7 +24,7 @@ export default (app: Probot) => {
     const owner = context.payload.repository.owner.login;
     const pullRequestNumber = context.payload.number;
     const senderId = context.payload.pull_request.user.id;
-    const organization = context.payload.organization?.login ?? '';
+    const organization = context.payload.repository.owner.login;
 
     context.log.info(
       `Handling newly merged PR: https://github.com/${owner}/${repo}/${pullRequestNumber}`,
@@ -39,7 +39,11 @@ export default (app: Probot) => {
     }
     // Check if organization is valid
     if (!organization) {
-      context.log.error(`Organization is empty`);
+      Sentry.setExtra(
+        'pull_request',
+        `repo: ${repo} owner: ${owner} pullRequestNumber: ${pullRequestNumber} senderId: ${senderId} organization: ${organization}`,
+      );
+      context.log.error(`Organization in '${repo}' repository is empty`);
       return;
     }
 
@@ -113,7 +117,11 @@ export default (app: Probot) => {
     }
     // Check if organization is valid
     if (!organization) {
-      context.log.error(`Organization is empty`);
+      Sentry.setExtra(
+        'issue_comment',
+        `repo: ${repo} owner: ${owner} organization: ${organization} sender: ${sender} comment: ${comment} issueNumber: ${issueNumber} link: ${htmlURL}`,
+      );
+      context.log.error(`Organization in '${repo}' repository is empty`);
       return;
     }
 
