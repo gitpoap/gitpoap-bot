@@ -24,7 +24,6 @@ export default (app: Probot) => {
     const owner = context.payload.repository.owner.login;
     const pullRequestNumber = context.payload.number;
     const senderId = context.payload.pull_request.user.id;
-    const organization = context.payload.repository.owner.login;
 
     context.log.info(
       `Handling newly merged PR: https://github.com/${owner}/${repo}/${pullRequestNumber}`,
@@ -37,13 +36,13 @@ export default (app: Probot) => {
       );
       return;
     }
-    // Check if organization is valid
-    if (!organization) {
+    // Check if owner is valid
+    if (!owner) {
       Sentry.setExtra(
         'pull_request',
-        `repo: ${repo} owner: ${owner} pullRequestNumber: ${pullRequestNumber} senderId: ${senderId} organization: ${organization}`,
+        `repo: ${repo} owner: ${owner} pullRequestNumber: ${pullRequestNumber} senderId: ${senderId}`,
       );
-      context.log.error(`Organization in '${repo}' repository is empty`);
+      context.log.error(`Owner of '${repo}' repository is empty`);
       return;
     }
 
@@ -52,7 +51,7 @@ export default (app: Probot) => {
 
     const body = JSON.stringify({
       pullRequest: {
-        organization,
+        organization: owner,
         repo,
         pullRequestNumber: pullRequestNumber,
         contributorGithubIds: [senderId],
@@ -101,7 +100,6 @@ export default (app: Probot) => {
   app.on('issue_comment.created', async (context: Context<'issue_comment.created'>) => {
     const repo = context.payload.repository.name;
     const owner = context.payload.repository.owner.login;
-    const organization = context.payload.repository.owner.login;
     const sender = context.payload.sender.login;
     const comment = context.payload.comment.body;
     const issueNumber = context.payload.issue.number;
@@ -115,13 +113,13 @@ export default (app: Probot) => {
       context.log.info(`Sender didn't tag @gitpoap-bot explicitly in this comment`);
       return;
     }
-    // Check if organization is valid
-    if (!organization) {
+    // Check if owner is valid
+    if (!owner) {
       Sentry.setExtra(
         'issue_comment',
-        `repo: ${repo} owner: ${owner} organization: ${organization} sender: ${sender} comment: ${comment} issueNumber: ${issueNumber} link: ${htmlURL}`,
+        `repo: ${repo} owner: ${owner} sender: ${sender} comment: ${comment} issueNumber: ${issueNumber} link: ${htmlURL}`,
       );
-      context.log.error(`Organization in '${repo}' repository is empty`);
+      context.log.error(`Owner of '${repo}' repository is empty`);
       return;
     }
 
@@ -153,7 +151,7 @@ export default (app: Probot) => {
       isPR
         ? {
             pullRequest: {
-              organization,
+              organization: owner,
               repo,
               pullRequestNumber: issueNumber,
               contributorGithubIds,
@@ -162,7 +160,7 @@ export default (app: Probot) => {
           }
         : {
             issue: {
-              organization,
+              organization: owner,
               repo,
               issueNumber,
               contributorGithubIds,
