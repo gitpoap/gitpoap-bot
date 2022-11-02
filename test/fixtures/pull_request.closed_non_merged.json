@@ -337,6 +337,20 @@
     "deletions": 1,
     "changed_files": 1
   },
+  "organization": {
+    "login": "gitpoap",
+    "id": 91488802,
+    "node_id": "MDEyOk9yZ2FuaXphdGlvbjkxNDg4ODAy",
+    "url": "https: //api.github.com/orgs/gitpoap",
+    "repos_url": "https: //api.github.com/orgs/gitpoap/repos",
+    "events_url": "https: //api.github.com/orgs/gitpoap/events",
+    "hooks_url": "https: //api.github.com/orgs/gitpoap/hooks",
+    "issues_url": "https: //api.github.com/orgs/gitpoap/issues",
+    "members_url": "https: //api.github.com/orgs/gitpoap/members{/member}",
+    "public_members_url": "https: //api.github.com/orgs/gitpoap/public_members{/member}",
+    "avatar_url": "https: //avatars.githubusercontent.com/u/91488802?v=4",
+    "description": ""
+  },
   "repository": {
     "id": 186853002,
     "node_id": "MDEwOlJlcG9zaXRvcnkxODY4NTMwMDI=",

@@ -37,6 +37,11 @@ export default (app: Probot) => {
       );
       return;
     }
+    // Check if organization is valid
+    if (!organization) {
+      context.log.info(`Organization is empty`);
+      return;
+    }
 
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
@@ -92,7 +97,7 @@ export default (app: Probot) => {
   app.on('issue_comment.created', async (context: Context<'issue_comment.created'>) => {
     const repo = context.payload.repository.name;
     const owner = context.payload.repository.owner.login;
-    const organization = context.payload.repository.owner.login;
+    const organization = context.payload.organization?.login ?? '';
     const sender = context.payload.sender.login;
     const comment = context.payload.comment.body;
     const issueNumber = context.payload.issue.number;
@@ -104,6 +109,11 @@ export default (app: Probot) => {
     // Check if comment tagged gitpoap-bot
     if (!parseResult.isBotMentioned) {
       context.log.info(`Sender didn't tag @gitpoap-bot explicitly in this comment`);
+      return;
+    }
+    // Check if organization is valid
+    if (!organization) {
+      context.log.info(`Organization is empty`);
       return;
     }
 
