@@ -1,7 +1,7 @@
 export const newClaims = [
   {
     id: 1,
-    user: { githubHandle: 'test1' },
+    githubUser: { githubHandle: 'test1' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -14,7 +14,7 @@ export const newClaims = [
   },
   {
     id: 2,
-    user: { githubHandle: 'test2' },
+    githubUser: { githubHandle: 'test2' },
     gitPOAP: {
       id: 16,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -27,7 +27,7 @@ export const newClaims = [
   },
   {
     id: 3,
-    user: { githubHandle: 'test3' },
+    githubUser: { githubHandle: 'test3' },
     gitPOAP: {
       id: 17,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -43,7 +43,7 @@ export const newClaims = [
 export const newClaimsHype = [
   {
     id: 1,
-    user: { githubHandle: 'test1' },
+    githubUser: { githubHandle: 'test1' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -56,7 +56,7 @@ export const newClaimsHype = [
   },
   {
     id: 2,
-    user: { githubHandle: 'test2' },
+    githubUser: { githubHandle: 'test2' },
     gitPOAP: {
       id: 16,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -69,7 +69,7 @@ export const newClaimsHype = [
   },
   {
     id: 3,
-    user: { githubHandle: 'test3' },
+    githubUser: { githubHandle: 'test3' },
     gitPOAP: {
       id: 17,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -85,7 +85,7 @@ export const newClaimsHype = [
 export const claimsWith3GitPoaps = [
   {
     id: 1,
-    user: { githubHandle: 'test1' },
+    githubUser: { githubHandle: 'test1' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -98,7 +98,7 @@ export const claimsWith3GitPoaps = [
   },
   {
     id: 2,
-    user: { githubHandle: 'test2' },
+    githubUser: { githubHandle: 'test2' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -111,7 +111,7 @@ export const claimsWith3GitPoaps = [
   },
   {
     id: 3,
-    user: { githubHandle: 'test3' },
+    githubUser: { githubHandle: 'test3' },
     gitPOAP: {
       id: 17,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -124,7 +124,7 @@ export const claimsWith3GitPoaps = [
   },
   {
     id: 4,
-    user: { githubHandle: 'test1' },
+    githubUser: { githubHandle: 'test1' },
     gitPOAP: {
       id: 18,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -140,7 +140,7 @@ export const claimsWith3GitPoaps = [
 export const claimsWith1GitPoap = [
   {
     id: 1,
-    user: { githubHandle: 'test1' },
+    githubUser: { githubHandle: 'test1' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -153,7 +153,7 @@ export const claimsWith1GitPoap = [
   },
   {
     id: 2,
-    user: { githubHandle: 'test2' },
+    githubUser: { githubHandle: 'test2' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -166,7 +166,7 @@ export const claimsWith1GitPoap = [
   },
   {
     id: 3,
-    user: { githubHandle: 'test3' },
+    githubUser: { githubHandle: 'test3' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -179,7 +179,7 @@ export const claimsWith1GitPoap = [
   },
   {
     id: 4,
-    user: { githubHandle: 'test4' },
+    githubUser: { githubHandle: 'test4' },
     gitPOAP: {
       id: 15,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -195,7 +195,7 @@ export const claimsWith1GitPoap = [
 export const newClaimsWithoutOrgs = [
   {
     id: 2,
-    user: { githubHandle: 'test2' },
+    githubUser: { githubHandle: 'test2' },
     gitPOAP: {
       id: 16,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
@@ -211,7 +211,7 @@ export const newClaimsWithoutOrgs = [
 export const newClaimsForValidUsers = [
   {
     id: 2,
-    user: { githubHandle: '-' },
+    githubUser: { githubHandle: '-' },
     gitPOAP: {
       id: 16,
       name: 'GitPOAP: 2022 gitpoap-bot-test-repo Contributor',
