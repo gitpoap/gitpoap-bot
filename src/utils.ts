@@ -13,7 +13,7 @@ type GitPOAP = {
 type BotClaimData = {
   id: number;
   gitPOAP: GitPOAP;
-  user: { githubHandle: string };
+  githubUser: { githubHandle: string };
 };
 
 type GitPOAPWithRecipients = GitPOAP & {
@@ -69,13 +69,13 @@ export function generateIssueComment(claims: BotClaimData[]): string {
   let gitPOAPsMap: GitPOAPWithRecipientsMap = {};
   let comment = '';
   // arrange claims by its id
-  for (let claim of claims) {
+  for (const claim of claims) {
     const recipients = gitPOAPsMap[claim.gitPOAP.id]
       ? gitPOAPsMap[claim.gitPOAP.id].recipients
       : [];
     gitPOAPsMap[claim.gitPOAP.id] = {
       ...claim.gitPOAP,
-      recipients: [...recipients, claim.user.githubHandle],
+      recipients: [...recipients, claim.githubUser.githubHandle],
     };
   }
   // generate a comment body
