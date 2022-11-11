@@ -70,12 +70,20 @@ export default (app: Probot) => {
     });
 
     if (res.status !== 200) {
-      Sentry.setExtra('body', body);
-      context.log.error(
-        `An issue occurred when attempting to create new claims - (response code: ${
-          res.status
-        }): ${await res.text()} - ${body}`,
-      );
+      if (res.status === 404) {
+        context.log.warn(
+          `An issue occurred when attempting to create new claims - (response code: ${
+            res.status
+          }): ${await res.text()} - ${body}`,
+        );
+      } else {
+        Sentry.setExtra('body', body);
+        context.log.error(
+          `An issue occurred when attempting to create new claims - (response code: ${
+            res.status
+          }): ${await res.text()} - ${body}`,
+        );
+      }
       return;
     }
 
