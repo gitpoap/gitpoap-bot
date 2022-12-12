@@ -2,6 +2,7 @@ import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
 import * as Sentry from '@sentry/node';
 import { generateComment, generateIssueComment, parseComment, CommentParseResult } from './utils';
+import { sendBotMentionedMessage, sendGitPOAPIssueMessage } from './slack';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -151,6 +152,8 @@ export default (app: Probot) => {
       context.log.info(`Sender didn't tag any users`);
       return;
     }
+    // send slack notification
+    sendBotMentionedMessage(comment, sender, htmlURL, repo);
     // Create claims for these contributors via API endpoint
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
@@ -212,6 +215,9 @@ export default (app: Probot) => {
     });
 
     const result = await context.octokit.issues.createComment(issueComment);
+
+    // send slack notification
+    sendGitPOAPIssueMessage(issueComment.body, htmlURL, repo);
 
     context.log.info(`Posted comment about new claims: ${result.data.html_url}`);
   });
