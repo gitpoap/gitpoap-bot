@@ -2,7 +2,7 @@ import { Context, Probot } from 'probot';
 import { fetch } from 'cross-fetch';
 import * as Sentry from '@sentry/node';
 import { generateComment, generateIssueComment, parseComment, CommentParseResult } from './utils';
-import { sendBotMentionedMessage, sendGitPOAPIssueMessage } from './slack';
+import { sendBotMentionedMessage } from './slack';
 
 /* @probot/pino automatically picks up SENTRY_DSN from .env */
 Sentry.init({
@@ -215,9 +215,6 @@ export default (app: Probot) => {
     });
 
     const result = await context.octokit.issues.createComment(issueComment);
-
-    // send slack notification
-    sendGitPOAPIssueMessage(issueComment.body, htmlURL, repo);
 
     context.log.info(`Posted comment about new claims: ${result.data.html_url}`);
   });
