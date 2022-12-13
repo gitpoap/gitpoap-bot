@@ -36,9 +36,9 @@ export const sendBotMentionedMessage = (
   htmlURL: string,
   repo: string,
 ) => {
-  const msg = `:robot_face: @gitpoap-bot was mentioned in <${htmlURL}|${repo}> repository.
-    * Sender GitHub handle: <https://github.com/${sender}|@${sender}>
-    * Comment: ${comment}`;
+  const msg = `:robot_face: @gitpoap-bot was mentioned in the <${htmlURL}|${repo}> repository.
+    * Sender: <https://github.com/${sender}|@${sender}>
+    * Comment: "${comment}"`;
 
   sendSlackMessage(msg);
 };
