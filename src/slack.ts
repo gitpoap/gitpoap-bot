@@ -42,10 +42,3 @@ export const sendBotMentionedMessage = (
 
   sendSlackMessage(msg);
 };
-
-export const sendGitPOAPIssueMessage = (comment: string, htmlURL: string, repo: string) => {
-  const msg = `:robot_face: @gitpoap-bot issued GitPOAPs to contributors in <${htmlURL}|${repo}> repository.
-      * Comments: ${comment}`;
-
-  sendSlackMessage(msg);
-};
