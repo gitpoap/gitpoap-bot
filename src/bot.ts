@@ -60,6 +60,10 @@ export default (app: Probot) => {
       },
     });
 
+    context.log.info(
+      `Attempting to create new claims via /claims/gitpoap-bot/create for ${owner}/${repo}/pulls/${pullRequestNumber} with the following body: ${body}.`,
+    );
+
     const res = await fetch(`${process.env.API_URL}/claims/gitpoap-bot/create`, {
       method: 'POST',
       headers: {
@@ -177,6 +181,10 @@ export default (app: Probot) => {
               wasEarnedByMention: true,
             },
           },
+    );
+
+    context.log.info(
+      `Attempting to create new claims via /claims/gitpoap-bot/create for ${owner}/${repo} with the following body: ${body}.`,
     );
 
     const res = await fetch(`${process.env.API_URL}/claims/gitpoap-bot/create`, {
