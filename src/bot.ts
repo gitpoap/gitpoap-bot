@@ -146,14 +146,13 @@ export default (app: Probot) => {
       return;
     }
 
-    // check if there are valid tagged users
+    // Check if there are valid tagged users
     const contributorGithubIds = parseResult.contributorIds;
     if (contributorGithubIds.length === 0) {
       context.log.info(`Sender didn't tag any users`);
       return;
     }
-    // send slack notification
-    sendBotMentionedMessage(comment, sender, htmlURL, repo);
+
     // Create claims for these contributors via API endpoint
     const octokit = await app.auth(); // Not passing an id returns a JWT-authenticated client
     const jwt = (await octokit.auth({ type: 'app' })) as { token: string };
@@ -204,11 +203,18 @@ export default (app: Probot) => {
     const response = await res.json();
 
     if (response.newClaims.length === 0) {
-      context.log.info('No new claims were created by this PR');
+      context.log.info(
+        'No new claims were created through the tagging of @gitpoap-bot in this comment.',
+      );
       return;
     }
 
-    context.log.info(`${response.newClaims.length} new Claims were created by this PR`);
+    context.log.info(
+      `${response.newClaims.length} new claims were created through the tagging of @gitpoap-bot in this comment.`,
+    );
+
+    // Send slack notification
+    sendBotMentionedMessage(comment, sender, htmlURL, repo);
 
     const issueComment = context.issue({
       body: generateIssueComment(response.newClaims),
@@ -216,6 +222,8 @@ export default (app: Probot) => {
 
     const result = await context.octokit.issues.createComment(issueComment);
 
-    context.log.info(`Posted comment about new claims: ${result.data.html_url}`);
+    context.log.info(
+      `@gitpoap-bot posted a comment about the new claims here: ${result.data.html_url}`,
+    );
   });
 };

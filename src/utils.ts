@@ -124,7 +124,7 @@ export const parseComment = async (
         username,
       });
       const user = res.data;
-      // we give GitPOAPs to only users, not orgnizations
+      // we give GitPOAPs to only users, not organizations
       if (user && user.id) {
         if (user.type === 'User') {
           validUserMentions.push(username);
