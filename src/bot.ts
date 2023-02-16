@@ -22,6 +22,7 @@ export default (app: Probot) => {
     }
 
     const repo = context.payload.repository.name;
+    const repoId = context.payload.repository.id;
     const owner = context.payload.repository.owner.login;
     const pullRequestNumber = context.payload.number;
     const senderId = context.payload.pull_request.user.id;
@@ -102,7 +103,7 @@ export default (app: Probot) => {
     context.log.info(`${response.newClaims.length} new Claims were created by this PR`);
 
     const issueComment = context.issue({
-      body: generateComment(response.newClaims),
+      body: generateComment(repoId, response.newClaims),
     });
 
     const result = await context.octokit.issues.createComment(issueComment);
