@@ -24,7 +24,7 @@ import {
 
 const privateKey = fs.readFileSync(path.join(__dirname, 'fixtures/mock-cert.pem'), 'utf-8');
 const issueCreatedBody = { body: generateIssueComment(newClaims) };
-const prClosedIssueCommentBody = { body: generateComment(newClaims) };
+const prClosedIssueCommentBody = { body: generateComment(3423, newClaims) };
 const issueCreatedBodyWithoutOrgs = { body: generateIssueComment(newClaimsWithoutOrgs) };
 const issueCreatedBodyForValidUsers = { body: generateIssueComment(newClaimsForValidUsers) };
 

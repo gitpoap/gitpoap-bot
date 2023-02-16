@@ -1,5 +1,6 @@
 import { Context } from 'probot';
 import issueParser, { Mention } from 'issue-parser';
+import { ETHEREUM_ORG_WEBSITE_ID } from './constants';
 
 // Should be the same as in gitpoap-backend/src/routes/claims.ts
 type GitPOAP = {
@@ -40,7 +41,11 @@ const addHeadOverToGitPOAP = (comment: string): string =>
   comment +
   `\n\nHead to [gitpoap.io](https://www.gitpoap.io) & connect your GitHub account to mint!`;
 
-export function generateComment(claims: BotClaimData[]): string {
+// Hardcode extra comments for ethereum-org-website
+const ethereumOrgWebsiteComment =
+  'Be sure to join the [Ethereum.org discord](https://ethereum.org/discord) if you are interested in contributing further to the project or have any questions for the team.';
+
+export function generateComment(repoId: number, claims: BotClaimData[]): string {
   let qualifier: string;
   if (claims.length > 1) {
     qualifier = `some GitPOAPs`;
@@ -49,6 +54,10 @@ export function generateComment(claims: BotClaimData[]): string {
   }
 
   let comment = `Congrats, your important contribution to this open-source project has earned you ${qualifier}!\n\n`;
+
+  if (repoId === ETHEREUM_ORG_WEBSITE_ID) {
+    comment += `${ethereumOrgWebsiteComment}\n\n`;
+  }
 
   for (const claim of claims) {
     if (claim.gitPOAP.id && claim.gitPOAP.name && claim.gitPOAP.imageUrl) {
