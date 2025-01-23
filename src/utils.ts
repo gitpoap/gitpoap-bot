@@ -43,7 +43,9 @@ const addHeadOverToGitPOAP = (comment: string): string =>
 
 // Hardcode extra comments for ethereum-org-website
 const ethereumOrgWebsiteComment =
-  'Be sure to join the [Ethereum.org discord](https://ethereum.org/discord) if you are interested in contributing further to the project or have any questions for the team.';
+  'Join the [ethereum.org Discord server](https://ethereum.org/discord) to explore more ways to contribute to the project. Depending on the tasks you complete, you may also unlock additional badges (OATs). Visit [ethereum.org/contributing](https://ethereum.org/contributing) to learn more.';
+
+const ethereumOrgWebsiteSubcomment = 'Keep buidling, keep learning, and let\'s grow the Ethereum open-source community together 🌱'
 
 export function generateComment(repoId: number, claims: BotClaimData[]): string {
   let qualifier: string;
@@ -55,10 +57,6 @@ export function generateComment(repoId: number, claims: BotClaimData[]): string 
 
   let comment = `Congrats, your important contribution to this open-source project has earned you ${qualifier}!\n\n`;
 
-  if (repoId === ETHEREUM_ORG_WEBSITE_ID) {
-    comment += `${ethereumOrgWebsiteComment}\n\n`;
-  }
-
   for (const claim of claims) {
     if (claim.gitPOAP.id && claim.gitPOAP.name && claim.gitPOAP.imageUrl) {
       comment += `
@@ -68,7 +66,17 @@ export function generateComment(repoId: number, claims: BotClaimData[]): string 
     }
   }
 
+
+  if (repoId === ETHEREUM_ORG_WEBSITE_ID) {
+    comment += `${ethereumOrgWebsiteComment}\n\n`;
+  }
+
   comment = addHeadOverToGitPOAP(comment);
+
+  if (repoId === ETHEREUM_ORG_WEBSITE_ID) {
+    comment += `${ethereumOrgWebsiteSubcomment}\n\n`;
+  }
+
   comment = addLearnMore(comment);
 
   return comment;
