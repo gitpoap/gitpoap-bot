@@ -43,7 +43,7 @@ const addHeadOverToGitPOAP = (comment: string): string =>
 
 // Hardcode extra comments for ethereum-org-website
 const ethereumOrgWebsiteComment =
-  'Join the [ethereum.org Discord server](https://ethereum.org/discord) to explore more ways to contribute to the project. Depending on the tasks you complete, you may also unlock additional badges (OATs). Visit [ethereum.org/contributing](https://ethereum.org/contributing) to learn more.';
+  'Join the [ethereum.org Discord server](https://ethereum.org/discord) to explore more ways to contribute to the project. Depending on the tasks you complete, you may also unlock additional rewards. Visit [ethereum.org/contributing](https://ethereum.org/contributing) to learn more.';
 
 const ethereumOrgWebsiteSubcomment = 'Keep buidling, keep learning, and let\'s grow the Ethereum open-source community together 🌱'
 
