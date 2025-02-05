@@ -85,7 +85,7 @@ export function generateComment(repoId: number, claims: BotClaimData[]): string 
 export function generateIssueComment(claims: BotClaimData[]): string {
   let gitPOAPsMap: GitPOAPWithRecipientsMap = {};
   let comment = '';
-  // arrange claims by its id
+  // arrange claims by their id
   for (const claim of claims) {
     const recipients = gitPOAPsMap[claim.gitPOAP.id]
       ? gitPOAPsMap[claim.gitPOAP.id].recipients
